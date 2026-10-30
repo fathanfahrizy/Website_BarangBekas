@@ -1,0 +1,128 @@
+<!-- 5. VALUE PROPOSITION BAR -->
+<section class="trust-bar" id="buyer-protection">
+  <div class="trust-item">
+    <span class="trust-icon">🎓</span>
+    <div class="trust-info">
+      <strong>Khusus Mahasiswa UG</strong>
+      <span>Verifikasi 8 digit NPM</span>
+    </div>
+  </div>
+  <div class="trust-item">
+    <span class="trust-icon">📍</span>
+    <div class="trust-info">
+      <strong>COD di Kampus</strong>
+      <span>Kampus D, E, G, H, J</span>
+    </div>
+  </div>
+  <div class="trust-item">
+    <span class="trust-icon">💬</span>
+    <div class="trust-info">
+      <strong>In-App Chat</strong>
+      <span>Negosiasi tanpa nomor HP</span>
+    </div>
+  </div>
+  <div class="trust-item">
+    <span class="trust-icon">💸</span>
+    <div class="trust-info">
+      <strong>Nol Biaya Admin</strong>
+      <span>100% keuntungan penjual</span>
+    </div>
+  </div>
+</section>
+
+<!-- 6. MARKET VIEW -->
+<section class="view-section" id="market-view">
+  <div class="section-header flex-between">
+    <div>
+      <h2 class="section-title">Jelajahi Semua Barang</h2>
+      <span class="section-subtitle">Harta karun preloved kampus</span>
+    </div>
+    <div class="filter-controls">
+      <div class="filter-pills">
+        <button class="pill-btn active" data-cat-id="">Semua</button>
+        <button class="pill-btn" data-cat-id="1">Buku</button>
+        <button class="pill-btn" data-cat-id="2">Elektronik</button>
+        <button class="pill-btn" data-cat-id="3">Kos</button>
+        <button class="pill-btn" data-cat-id="4">Fashion</button>
+      </div>
+      <select id="category-filter" class="filter-select">
+        <option value="">Semua Kategori</option>
+      </select>
+    </div>
+  </div>
+  <div class="product-grid" id="listing-grid"></div>
+  <div class="empty-state hidden" id="market-empty">
+    <div class="empty-icon">🔍</div>
+    <h3>Belum ada barang di kategori ini</h3>
+    <button class="btn btn-primary mt-4" id="empty-sell">Jual Barang Pertama</button>
+  </div>
+</section>
+
+<!-- 7. MY LISTINGS VIEW -->
+<section class="view-section hidden" id="my-listings-view">
+  <div class="section-header flex-between">
+    <h2 class="section-title">Etalase Saya</h2>
+    <button class="btn btn-primary" id="my-sell">＋ Pasang Iklan Baru</button>
+  </div>
+  <div class="product-grid" id="my-listing-grid"></div>
+  <div class="empty-state hidden" id="my-listing-empty">
+    <div class="empty-icon">📦</div>
+    <h3>Etalasemu Masih Kosong</h3>
+    <p>Yuk jual barang preloved kamu sekarang!</p>
+  </div>
+</section>
+
+<!-- 8. CHATS VIEW -->
+<section class="view-section hidden" id="chats-view">
+  <div class="section-header">
+    <h2 class="section-title">Pesan Obrolan</h2>
+  </div>
+  <div class="chat-container">
+    <aside class="chat-sidebar" id="conversation-list"></aside>
+    <div class="chat-main" id="chat-window">
+      <div class="chat-empty">
+        <span>💬</span>
+        <h3>Pilih Percakapan</h3>
+        <p>Diskusikan detail barang dan tentukan lokasi meetup.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 9. PROFILE VIEW -->
+<section class="view-section hidden" id="profile-view">
+  <div class="section-header">
+    <h2 class="section-title">Profil Mahasiswa</h2>
+  </div>
+  <div class="profile-container">
+    <form id="profile-form" class="profile-form-layout">
+      <div class="profile-avatar-section">
+        <div class="avatar-huge" id="profile-photo">?</div>
+        <label class="btn btn-outline btn-sm mt-3" for="profile-avatar">Ganti Foto</label>
+        <input id="profile-avatar" name="avatar" type="file" accept="image/jpeg,image/png,image/webp" class="hidden-input">
+      </div>
+      <div class="profile-fields-section">
+        <div class="form-group">
+          <label>Nama Lengkap</label>
+          <input name="fullName" class="form-input" required minlength="2" maxlength="100" placeholder="Sesuai KTM">
+        </div>
+        <div class="form-group">
+          <label>Username Publik <span class="text-xs text-gray">(Opsional)</span></label>
+          <input name="username" class="form-input" maxlength="30" pattern="[A-Za-z0-9_]{3,30}" placeholder="contoh: zacky_gunadarma">
+        </div>
+        <div class="form-group">
+          <label>NPM Gunadarma 🔒</label>
+          <input name="npm" class="form-input input-disabled" readonly>
+        </div>
+        <div class="form-group">
+          <label>Nomor WhatsApp 🔒</label>
+          <input name="phone" class="form-input" required inputmode="tel" placeholder="08xxxxxxxxxx">
+        </div>
+        <div class="form-actions mt-6">
+          <button class="btn btn-primary" type="submit">Simpan Perubahan</button>
+          <button class="btn btn-danger-outline" id="logout-button" type="button">Keluar</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</section>

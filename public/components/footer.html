@@ -1,0 +1,144 @@
+<!-- 10. FLOATING QUICK DOCK -->
+<aside class="floating-dock">
+  <button class="dock-btn signed-in-only hidden" id="dock-chats" title="Pesan">💬</button>
+  <button class="dock-btn signed-in-only hidden" id="dock-my" title="Etalase">📦</button>
+  <button class="dock-btn" id="dock-sell" title="Jual">＋</button>
+  <button class="dock-btn" id="dock-top" title="Ke Atas">▲</button>
+</aside>
+
+<!-- 11. FOOTER -->
+<footer class="main-footer">
+  <div class="container footer-grid">
+    <div class="footer-brand">
+      <div class="brand">
+        <div class="brand-icon">UG</div>
+        <div class="brand-text"><span class="brand-name">pasar<strong>kampus</strong></span></div>
+      </div>
+      <p class="mt-4 text-sm">Wadah jual beli preloved sesama mahasiswa Universitas Gunadarma.</p>
+    </div>
+    <div class="footer-links">
+      <h4>Kategori Populer</h4>
+      <ul>
+        <li><a href="#" data-footer-cat="1">Buku Teks & Modul</a></li>
+        <li><a href="#" data-footer-cat="2">Kalkulator Ilmiah</a></li>
+        <li><a href="#" data-footer-cat="4">Jas Lab & Pakaian</a></li>
+      </ul>
+    </div>
+    <div class="footer-links">
+      <h4>Panduan</h4>
+      <ul>
+        <li><a href="#" id="footer-login-link">Daftar Akun (NPM)</a></li>
+        <li><a href="#" id="footer-sell-link">Cara Pasang Iklan</a></li>
+        <li><a href="#buyer-protection">Tips Aman COD</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="container flex-between text-sm">
+      <span>© 2026 PasarKampus Gunadarma.</span>
+      <span>Dibuat dengan ❤️ oleh Mahasiswa UG</span>
+    </div>
+  </div>
+</footer>
+
+<!-- 12. MODAL: AUTHENTICATION -->
+<dialog id="auth-dialog" class="modal-dialog">
+  <div class="modal-content auth-modal-content">
+    <button class="modal-close" data-close="auth-dialog">×</button>
+    <div class="text-center mb-6">
+      <h2 id="auth-title" class="text-xl font-bold">Selamat Datang Kembali</h2>
+      <p id="auth-subtitle" class="text-sm text-gray">Masuk dengan NPM Gunadarma.</p>
+    </div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" data-auth-mode="login">Masuk</button>
+      <button class="auth-tab" data-auth-mode="register">Daftar</button>
+    </div>
+    <form id="auth-form" class="mt-4">
+      <div class="form-group">
+        <label>NPM (8 Digit)</label>
+        <input name="npm" class="form-input" inputmode="numeric" required maxlength="8" placeholder="Contoh: 50422001">
+      </div>
+      <div class="register-only hidden form-group">
+        <label>Nama Lengkap</label>
+        <input name="fullName" class="form-input" maxlength="100" placeholder="Sesuai KTM">
+      </div>
+      <div class="register-only hidden form-group">
+        <label>Username Publik</label>
+        <input name="username" class="form-input" maxlength="30" placeholder="Opsional">
+      </div>
+      <div class="register-only hidden form-group">
+        <label>Nomor WhatsApp</label>
+        <input name="phone" class="form-input" inputmode="tel" placeholder="08xxxxxxxxxx">
+      </div>
+      <div class="form-group">
+        <label>Kata Sandi</label>
+        <input name="password" class="form-input" type="password" minlength="8" required placeholder="Minimal 8 karakter">
+      </div>
+      <div class="error-msg hidden" id="auth-error"></div>
+      <button class="btn btn-primary w-full mt-4" id="auth-submit" type="submit">Masuk</button>
+    </form>
+  </div>
+</dialog>
+
+<!-- 13. MODAL: PASANG IKLAN -->
+<dialog id="listing-dialog" class="modal-dialog">
+  <div class="modal-content listing-modal-content">
+    <button class="modal-close" data-close="listing-dialog">×</button>
+    <div class="mb-6">
+      <h2 class="text-xl font-bold">Pasang Barang Preloved</h2>
+    </div>
+    <form id="listing-form">
+      <div class="form-group">
+        <label>Nama Barang</label>
+        <input name="title" class="form-input" required minlength="3" maxlength="150" placeholder="Contoh: Buku Algoritma C++">
+      </div>
+      <div class="form-group">
+        <label>Deskripsi & Kelengkapan</label>
+        <textarea name="description" class="form-input" required maxlength="5000" rows="4" placeholder="Jelaskan kondisi fisik..."></textarea>
+      </div>
+      <div class="form-row grid-2">
+        <div class="form-group">
+          <label>Harga (Rp)</label>
+          <input name="price" class="form-input" type="number" min="0" step="1000" required placeholder="50000">
+        </div>
+        <div class="form-group">
+          <label>Kategori</label>
+          <select name="categoryId" class="form-input" required></select>
+        </div>
+      </div>
+      <div class="form-row grid-2">
+        <div class="form-group">
+          <label>Kondisi</label>
+          <select name="itemCondition" class="form-input" required>
+            <option value="">Pilih...</option>
+            <option value="like_new">Seperti Baru</option>
+            <option value="good">Bagus</option>
+            <option value="fair">Layak</option>
+            <option value="needs_repair">Perlu Perbaikan</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Lokasi COD</label>
+          <input name="meetupLocation" class="form-input" maxlength="150" placeholder="Contoh: Kampus D">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Foto Barang (Maks 4)</label>
+        <input name="images" class="form-input" type="file" accept="image/jpeg,image/png,image/webp" multiple>
+      </div>
+      <div class="error-msg hidden" id="listing-error"></div>
+      <button class="btn btn-primary w-full mt-4" type="submit">Tayangkan Iklan 🚀</button>
+    </form>
+  </div>
+</dialog>
+
+<!-- 14. MODAL: DETAIL BARANG -->
+<dialog id="detail-dialog" class="modal-dialog">
+  <div class="modal-content detail-modal-content">
+    <button class="modal-close" data-close="detail-dialog">×</button>
+    <div id="detail-content"></div>
+  </div>
+</dialog>
+
+<!-- 15. TOAST NOTIFICATION -->
+<div id="toast" class="toast-container" role="status" aria-live="polite"></div>

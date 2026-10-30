@@ -1,0 +1,89 @@
+<!-- 1. TOP UTILITY BAR -->
+<div class="top-bar">
+  <div class="container top-bar-inner">
+    <div class="top-bar-left">
+      <span class="badge-campus">Portal Resmi Jual Beli Mahasiswa Gunadarma</span>
+      <span class="divider">|</span>
+      <span class="location-picker">📍 Wilayah COD: <strong>Kampus D, E, J, H</strong></span>
+    </div>
+    <div class="top-bar-right">
+      <span>🛡️ 100% Bebas Biaya Admin</span>
+      <span class="divider">|</span>
+      <a href="#buyer-protection" class="link-hover">Panduan COD Aman</a>
+      <span class="divider">|</span>
+      <span class="signed-in-only hidden top-npm" id="top-npm-badge">NPM: <strong id="top-user-npm">-</strong></span>
+    </div>
+  </div>
+</div>
+
+<!-- 2. MAIN HEADER -->
+<header class="navbar-main">
+  <div class="container navbar-inner">
+    <a class="brand" href="/" aria-label="PasarKampus Gunadarma">
+      <div class="brand-icon">UG</div>
+      <div class="brand-text">
+        <span class="brand-name">pasar<strong>kampus</strong></span>
+      </div>
+    </a>
+
+    <div class="search-wrapper">
+      <div class="search-box">
+        <div class="search-dropdown">
+          <span class="search-category-pill">Semua ▼</span>
+        </div>
+        <input id="search-input" class="search-input" type="search" placeholder="Cari buku, jas lab, kalkulator, kipas kos..." aria-label="Cari barang">
+        <button class="search-btn" id="search-button" aria-label="Cari">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="search-keywords" id="trending-keywords">
+        <span>Populer:</span>
+        <button class="keyword-tag" data-query="buku">Buku</button>
+        <button class="keyword-tag" data-query="kalkulator">Kalkulator</button>
+        <button class="keyword-tag" data-query="jas lab">Jas Lab</button>
+        <button class="keyword-tag" data-query="kipas">Kipas</button>
+      </div>
+    </div>
+
+    <div class="user-actions">
+  <!-- Ikon Pesan / Chat (Menggantikan tombol "Pesan" teks) -->
+  <button class="action-icon signed-in-only hidden" id="messages-nav" title="Pesan" style="position: relative; padding: 8px;">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+    </svg>
+    <!-- Badge notifikasi merah ala JD.com -->
+    <i id="message-dot" class="badge-dot hidden" style="position: absolute; top: 4px; right: 4px; width: 10px; height: 10px; background: #ef4444; border: 2px solid var(--bg-raw); border-radius: 50%;"></i>
+  </button>
+
+  <!-- Ikon Profil (Menggantikan avatar huruf jelek) -->
+  <button class="action-icon signed-in-only hidden" id="account-button" title="Profil">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+      <circle cx="12" cy="7" r="4"></circle>
+    </svg>
+  </button>
+
+  <button class="btn" id="login-button">LOGIN</button>
+  <button class="btn btn-sell" id="sell-button">JUAL BARANG</button>
+</div>
+</header>
+
+<!-- 3. SUB NAVIGATION TABS -->
+<nav class="sub-nav">
+  <div class="container sub-nav-inner">
+    <div class="nav-tabs">
+      <button class="nav-tab active" data-view="market">Jelajahi Pasar</button>
+      <button class="nav-tab signed-in-only hidden" data-view="my-listings">Etalase Saya</button>
+      <button class="nav-tab signed-in-only hidden" data-view="chats">
+        Obrolan <span id="chat-count" class="counter hidden">0</span>
+      </button>
+      <button class="nav-tab signed-in-only hidden" data-view="profile">Profil Mahasiswa</button>
+    </div>
+    <div class="nav-community">
+      <span class="live-indicator"></span> Komunitas UG
+    </div>
+  </div>
+</nav>
