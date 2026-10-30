@@ -1,0 +1,560 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#5c2d91">
+  <title>PasarKampus Gunadarma — Marketplace Preloved Mahasiswa UG</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="js/app.js" defer></script>
+</head>
+<body>
+  <!-- 1. TOP UTILITY BAR (Ala Taobao / AliExpress Topbar) -->
+  <div class="top-utility-bar">
+    <div class="utility-container">
+      <div class="utility-left">
+        <span class="campus-badge"><i class="badge-dot"></i> Portal Resmi Jual Beli Mahasiswa Gunadarma</span>
+        <span class="utility-divider">|</span>
+        <span class="utility-campus-picker">📍 Wilayah COD: <strong>Kampus D Margonda, E Kelapa Dua, J Kalimalang, H Simatupang</strong></span>
+      </div>
+      <div class="utility-right">
+        <span class="utility-item">🛡️ 100% Bebas Biaya Admin & Bebas Ongkir</span>
+        <span class="utility-divider">|</span>
+        <a href="#buyer-protection" class="utility-link">Panduan COD Aman</a>
+        <span class="utility-divider">|</span>
+        <span class="utility-item signed-in-only hidden" id="top-npm-badge">NPM: <strong id="top-user-npm">-</strong></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. MAIN HEADER (Mega Search Taobao / AliExpress Style) -->
+  <header class="main-header">
+    <div class="header-container">
+      <!-- Brand Logo -->
+      <a class="brand-logo" href="/" aria-label="PasarKampus Gunadarma">
+        <div class="logo-symbol">UG</div>
+        <div class="logo-text">
+          <span class="logo-title">pasar<span class="logo-accent">kampus</span></span>
+          <span class="logo-sub">UNIVERSITAS GUNADARMA</span>
+        </div>
+      </a>
+
+      <!-- Mega Search Bar (Taobao Centerpiece) -->
+      <div class="mega-search-wrapper">
+        <div class="search-input-group">
+          <div class="search-category-pill">
+            <span class="pill-label">Semua</span>
+            <span class="pill-arrow">▼</span>
+          </div>
+          <input id="search-input" type="search" placeholder="Cari buku kalkulus, jas lab, kalkulator Casio, kipas kos..." aria-label="Cari barang">
+          <button class="search-submit-btn" id="search-button" aria-label="Cari">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <span>Cari</span>
+          </button>
+        </div>
+        <!-- Trending Campus Keywords (AliExpress / Taobao Style) -->
+        <div class="trending-keywords" id="trending-keywords">
+          <span class="trending-label">Populer:</span>
+          <button class="keyword-tag" data-query="buku">Buku Kuliah</button>
+          <button class="keyword-tag" data-query="kalkulator">Kalkulator Casio</button>
+          <button class="keyword-tag" data-query="jas lab">Jas Lab</button>
+          <button class="keyword-tag" data-query="kipas">Kipas Kos</button>
+          <button class="keyword-tag" data-query="akuntansi">Akuntansi</button>
+          <button class="keyword-tag" data-query="algoritma">Informatika</button>
+        </div>
+      </div>
+
+      <!-- Header Action Controls -->
+      <div class="header-user-actions">
+        <!-- Messages Nav Icon Button -->
+        <button class="header-icon-btn signed-in-only hidden" id="messages-nav" title="Pesan Obrolan">
+          <div class="icon-wrap">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <i id="message-dot" class="notification-badge hidden"></i>
+          </div>
+          <span class="icon-caption">Pesan</span>
+        </button>
+
+        <!-- Account Avatar Button -->
+        <button class="header-avatar-btn signed-in-only hidden" id="account-button" title="Profil Saya">
+          <div class="avatar-circle">?</div>
+          <span class="icon-caption">Profil</span>
+        </button>
+
+        <!-- Login / Register Buttons -->
+        <button class="btn btn-outline" id="login-button">Masuk Akun</button>
+
+        <!-- Prominent Sell Button (Gold-Purple Accent) -->
+        <button class="btn btn-sell" id="sell-button">
+          <span class="btn-icon">＋</span>
+          <span>Jual Barang</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 3. MAIN NAVIGATION TABS (AliExpress / Taobao Subheader Bar) -->
+  <nav class="sub-nav-bar" aria-label="Navigasi Kategori">
+    <div class="sub-nav-container">
+      <div class="nav-tabs-wrapper">
+        <button class="nav-tab active" data-view="market">
+          <span class="tab-icon">🏷️</span> Jelajahi Pasar
+        </button>
+        <button class="nav-tab signed-in-only hidden" data-view="my-listings">
+          <span class="tab-icon">📦</span> Etalase Saya
+        </button>
+        <button class="nav-tab signed-in-only hidden" data-view="chats">
+          <span class="tab-icon">💬</span> Obrolan & Negosiasi <span id="chat-count" class="pill-counter hidden">0</span>
+        </button>
+        <button class="nav-tab signed-in-only hidden" data-view="profile">
+          <span class="tab-icon">👤</span> Profil Mahasiswa
+        </button>
+      </div>
+      <div class="nav-campus-tag">
+        <span class="live-dot"></span> Komunitas Mahasiswa Gunadarma
+      </div>
+    </div>
+  </nav>
+
+  <main class="page-body">
+    <!-- 4. TAOBAO / ALIBABA HERO SECTION (3 Columns: Categories Tree + Hero Carousel + Student Profile) -->
+    <section class="hero-showcase" id="welcome-banner">
+      <div class="hero-grid">
+        <!-- Col 1: Vertical Category Sidebar (Taobao Mega Menu Style) -->
+        <aside class="hero-category-sidebar">
+          <div class="sidebar-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+            <span>Kategori Utama</span>
+          </div>
+          <ul class="category-menu-list">
+            <li class="category-item" data-category="1">
+              <span class="cat-icon">📚</span>
+              <span class="cat-name">Buku & Modul Kuliah</span>
+              <span class="cat-badge">Populer</span>
+            </li>
+            <li class="category-item" data-category="2">
+              <span class="cat-icon">💻</span>
+              <span class="cat-name">Elektronik & Praktikum</span>
+              <span class="cat-badge hot">Hot</span>
+            </li>
+            <li class="category-item" data-category="3">
+              <span class="cat-icon">🛏️</span>
+              <span class="cat-name">Perlengkapan Kos</span>
+            </li>
+            <li class="category-item" data-category="4">
+              <span class="cat-icon">🥼</span>
+              <span class="cat-name">Jas Lab & Fashion UG</span>
+            </li>
+            <li class="category-item" data-category="5">
+              <span class="cat-icon">🛵</span>
+              <span class="cat-name">Kendaraan & Helm</span>
+            </li>
+            <li class="category-item" data-category="6">
+              <span class="cat-icon">📦</span>
+              <span class="cat-name">Kebutuhan Lainnya</span>
+            </li>
+          </ul>
+        </aside>
+
+        <!-- Col 2: Hero Main Promo Banner (Gunadarma Purple + Gold Gradients) -->
+        <div class="hero-banner-main">
+          <div class="banner-content">
+            <div class="banner-badge">🎓 PASAR PRELOVED RESMI GUNADARMA</div>
+            <h1 class="banner-title">
+              Barang Kuliah Bagus, <br>
+              <span class="text-gold">Harga Sahabat Mahasiswa.</span>
+            </h1>
+            <p class="banner-desc">
+              Jual beli buku, jas praktikum, kalkulator, dan perabot kos langsung sesama teman kampus. 
+              <strong>COD mudah di Kampus D Margonda, E Kelapa Dua, J Kalimalang</strong> tanpa resiko ongkir!
+            </p>
+            <div class="banner-cta-group">
+              <button class="btn btn-gold" id="welcome-sell">
+                <span>Mulai Jual Barangmu</span>
+                <span class="arrow-icon">→</span>
+              </button>
+              <a href="#listing-grid" class="btn btn-translucent">
+                <span>Lihat Barang Terbaru</span>
+              </a>
+            </div>
+          </div>
+          <!-- Decorative Background Campus Art -->
+          <div class="banner-graphic-cards" aria-hidden="true">
+            <div class="graphic-badge card-a">📚<small>Buku Semester</small></div>
+            <div class="graphic-badge card-b">🥼<small>Jas Lab Bersih</small></div>
+            <div class="graphic-badge card-c">⚡<small>Casio fx-991</small></div>
+          </div>
+        </div>
+
+        <!-- Col 3: Student Quick Profile / Fast Action Panel (Taobao Style User Box) -->
+        <aside class="hero-user-sidebar">
+          <div class="user-sidebar-card">
+            <div class="user-avatar-wrap">
+              <div class="user-avatar-large" id="hero-user-avatar">🎓</div>
+              <div class="user-greeting-meta">
+                <span class="greeting-prefix">Halo, Mahasiswa UG!</span>
+                <strong class="greeting-name" id="hero-user-name">Tamu Kampus</strong>
+              </div>
+            </div>
+
+            <div class="user-status-strip">
+              <span class="status-pill">✅ 100% Khusus Civitas UG</span>
+              <span class="status-pill gold">🤝 COD Bebas Admin</span>
+            </div>
+
+            <div class="sidebar-action-buttons">
+              <button class="btn btn-purple-gradient full-width" id="hero-action-sell">
+                ＋ Pasang Iklan Sekarang
+              </button>
+              <button class="btn btn-ghost full-width" id="hero-action-login">
+                Masuk / Buka Profil
+              </button>
+            </div>
+
+            <div class="campus-safety-box">
+              <div class="safety-header">
+                <span>🛡️ Tips COD Aman di Kampus:</span>
+              </div>
+              <ul class="safety-points">
+                <li>Sepakati meetup di kantin atau perpus kampus.</li>
+                <li>Periksa kondisi barang sebelum serah terima uang.</li>
+                <li>Gunakan chat PasarKampus untuk menyimpan bukti janji.</li>
+              </ul>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- 5. ALIEXPRESS / GEARBEST VALUE HIGHLIGHTS BAR -->
+    <section class="value-trust-bar" id="buyer-protection">
+      <div class="value-item">
+        <span class="value-icon">🎓</span>
+        <div class="value-text">
+          <strong>Khusus Mahasiswa UG</strong>
+          <small>Verifikasi otomatis 8 digit NPM Gunadarma</small>
+        </div>
+      </div>
+      <div class="value-item">
+        <span class="value-icon">📍</span>
+        <div class="value-text">
+          <strong>COD Langsung di Kampus</strong>
+          <small>Titik kumpul di Kampus D, E, G, H, J, dll</small>
+        </div>
+      </div>
+      <div class="value-item">
+        <span class="value-icon">💬</span>
+        <div class="value-text">
+          <strong>In-App Chat Terintegrasi</strong>
+          <small>Negosiasi harga tanpa membocorkan nomor HP</small>
+        </div>
+      </div>
+      <div class="value-item">
+        <span class="value-icon">💸</span>
+        <div class="value-text">
+          <strong>Nol Biaya Transaksi</strong>
+          <small>100% uang penjualan untuk penjual tanpa potongan</small>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. VIEW PANEL: JELAJAHI PASAR (Market View) -->
+    <section class="view-panel" id="market-view">
+      <!-- Section Header with Sorting & Category Dropdown (Taobao Filter Toolbar) -->
+      <div class="market-toolbar">
+        <div class="toolbar-left">
+          <span class="section-eyebrow">HARTA KARUN PRELOVED KAMPUS</span>
+          <h2 class="section-title">Jelajahi Semua Barang</h2>
+        </div>
+        <div class="toolbar-right">
+          <!-- Quick Filter Pills -->
+          <div class="quick-filter-pills">
+            <button class="pill-btn active" data-cat-id="">Semua</button>
+            <button class="pill-btn" data-cat-id="1">Buku</button>
+            <button class="pill-btn" data-cat-id="2">Elektronik</button>
+            <button class="pill-btn" data-cat-id="3">Kos</button>
+            <button class="pill-btn" data-cat-id="4">Fashion</button>
+          </div>
+          <!-- Dropdown Kategori Utama -->
+          <label class="category-dropdown-box">
+            <span>Filter Kategori:</span>
+            <select id="category-filter">
+              <option value="">Semua Kategori</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <!-- Listing Cards Grid (Taobao / AliExpress 4-Col Grid) -->
+      <div class="listing-grid" id="listing-grid"></div>
+
+      <!-- Empty State -->
+      <div class="empty-state hidden" id="market-empty">
+        <div class="empty-illustration">🔍</div>
+        <h3>Belum ada barang di kategori ini</h3>
+        <p>Coba kata kunci lain atau jadilah yang pertama menjual barang di kampus!</p>
+        <button class="btn btn-sell" id="empty-sell">Jual Barang Pertama</button>
+      </div>
+    </section>
+
+    <!-- 7. VIEW PANEL: BARANG SAYA (My Listings View) -->
+    <section class="view-panel hidden" id="my-listings-view">
+      <div class="market-toolbar">
+        <div>
+          <span class="section-eyebrow">ETALASE MAHASISWA</span>
+          <h2 class="section-title">Barang yang Saya Pasang</h2>
+        </div>
+        <button class="btn btn-sell" id="my-sell">＋ Pasang Iklan Baru</button>
+      </div>
+      <div class="listing-grid" id="my-listing-grid"></div>
+      <div class="empty-state hidden" id="my-listing-empty">
+        <div class="empty-illustration">📦</div>
+        <h3>Etalasemu Masih Kosong</h3>
+        <p>Punya buku semester lalu, jas lab yang kekecilan, atau perabot kos tak terpakai? Yuk jual sekarang!</p>
+      </div>
+    </section>
+
+    <!-- 8. VIEW PANEL: OBROLAN / PESAN (Chats View Ala Taobao AliWangWang) -->
+    <section class="view-panel hidden" id="chats-view">
+      <div class="market-toolbar">
+        <div>
+          <span class="section-eyebrow">NEGOSIASI & JANJI MEETUP</span>
+          <h2 class="section-title">Pesan Obrolan</h2>
+        </div>
+      </div>
+      <div class="chat-shell">
+        <!-- Sidebar Daftar Percakapan -->
+        <aside class="conversation-list" id="conversation-list"></aside>
+        <!-- Jendela Obrolan Aktif -->
+        <div class="chat-window" id="chat-window">
+          <div class="chat-placeholder">
+            <span class="chat-placeholder-icon">💬</span>
+            <h3>Pilih Percakapan</h3>
+            <p>Diskusikan detail kondisi barang, tawaran harga, dan tentukan lokasi meetup langsung di kampus.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 9. VIEW PANEL: PROFIL SAYA (Profile View) -->
+    <section class="view-panel hidden" id="profile-view">
+      <div class="market-toolbar">
+        <div>
+          <span class="section-eyebrow">PENGATURAN IDENTITAS</span>
+          <h2 class="section-title">Profil Mahasiswa</h2>
+        </div>
+      </div>
+      <form id="profile-form" class="profile-card">
+        <div class="profile-photo-wrap">
+          <div class="profile-photo" id="profile-photo">?</div>
+          <label class="photo-edit" for="profile-avatar" title="Ganti Foto">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+              <circle cx="12" cy="13" r="4"></circle>
+            </svg>
+          </label>
+          <input id="profile-avatar" name="avatar" type="file" accept="image/jpeg,image/png,image/webp" class="visually-hidden">
+        </div>
+        <div class="profile-fields">
+          <label>Nama Lengkap
+            <input name="fullName" required minlength="2" maxlength="100" placeholder="Nama sesuai KTM">
+          </label>
+          <label>Username Publik <span class="field-hint">opsional · nama yang tampil di etalase/chat</span>
+            <input name="username" maxlength="30" pattern="[A-Za-z0-9_]{3,30}" placeholder="contoh: zacky_gunadarma">
+          </label>
+          <label>NPM Gunadarma <span class="field-hint">🔒 terverifikasi dan terkunci otomatis</span>
+            <input name="npm" readonly class="input-readonly">
+          </label>
+          <label>Nomor WhatsApp / Telepon <span class="field-hint">🔒 pribadi · tidak ditampilkan ke umum</span>
+            <input name="phone" required inputmode="tel" placeholder="08xxxxxxxxxx">
+          </label>
+          <div class="profile-actions">
+            <button class="btn btn-purple-gradient" type="submit">Simpan Perubahan</button>
+            <button class="btn btn-quiet" id="logout-button" type="button">Keluar dari Akun</button>
+          </div>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <!-- 10. TAOBAO / ALIEXPRESS FLOATING RIGHT QUICK-DOCK -->
+  <aside class="floating-quick-dock" aria-label="Aksi Cepat">
+    <button class="dock-btn signed-in-only hidden" id="dock-chats" title="Buka Pesan">
+      <span class="dock-icon">💬</span>
+      <span class="dock-text">Pesan</span>
+    </button>
+    <button class="dock-btn signed-in-only hidden" id="dock-my" title="Barang Saya">
+      <span class="dock-icon">📦</span>
+      <span class="dock-text">Etalase</span>
+    </button>
+    <button class="dock-btn" id="dock-sell" title="Jual Barang">
+      <span class="dock-icon">＋</span>
+      <span class="dock-text">Jual</span>
+    </button>
+    <button class="dock-btn" id="dock-top" title="Kembali ke Atas">
+      <span class="dock-icon">▲</span>
+      <span class="dock-text">Top</span>
+    </button>
+  </aside>
+
+  <!-- 11. MEGA FOOTER (DHgate / Alibaba Style Campus Trust & Links) -->
+  <footer class="mega-footer">
+    <div class="footer-top-container">
+      <div class="footer-brand-column">
+        <div class="brand-logo footer-logo">
+          <div class="logo-symbol">UG</div>
+          <div class="logo-text">
+            <span class="logo-title">pasar<span class="logo-accent">kampus</span></span>
+            <span class="logo-sub">UNIVERSITAS GUNADARMA</span>
+          </div>
+        </div>
+        <p class="footer-desc">
+          Wadah jual beli preloved sesama mahasiswa Universitas Gunadarma. Mendorong budaya saling bantu, hemat biaya kuliah, dan ramah lingkungan melalui sirkulasi barang bekas bermanfaat.
+        </p>
+        <div class="footer-campuses">
+          <strong>Wilayah Meetup / COD Terpadu:</strong>
+          <p>Kampus A (Kenari) · Kampus B (Salemba Bluntas) · Kampus C (Salemba Tengah) · Kampus D (Margonda) · Kampus E (Kelapa Dua) · Kampus G (Lab Kelapa Dua) · Kampus H (Simatupang) · Kampus J (Kalimalang) · Kampus K (Karawaci)</p>
+        </div>
+      </div>
+      <div class="footer-links-column">
+        <h4>Kategori Populer</h4>
+        <ul>
+          <li><a href="#" data-footer-cat="1">Buku Teks & Modul Kuliah</a></li>
+          <li><a href="#" data-footer-cat="2">Kalkulator Ilmiah & Komputer</a></li>
+          <li><a href="#" data-footer-cat="4">Jas Lab & Pakaian Angkatan</a></li>
+          <li><a href="#" data-footer-cat="3">Peralatan Kos & Elektronik Mini</a></li>
+        </ul>
+      </div>
+      <div class="footer-links-column">
+        <h4>Panduan Kampus</h4>
+        <ul>
+          <li><a href="#" id="footer-login-link">Daftar Akun Mahasiswa (NPM)</a></li>
+          <li><a href="#" id="footer-sell-link">Cara Memasang Iklan Preloved</a></li>
+          <li><a href="#buyer-protection">Tips Aman COD di Area Kampus</a></li>
+          <li><a href="#welcome-banner">Peraturan Jual Beli Komunitas</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom-bar">
+      <span>© 2026 PasarKampus Gunadarma. Tugas Rekayasa Web & Basis Data Komunitas.</span>
+      <span>Dibuat dengan ❤️ oleh Mahasiswa Universitas Gunadarma (PHP & MySQL Edition)</span>
+    </div>
+  </footer>
+
+  <!-- 12. MODAL DIALOG: AUTHENTICATION (Login / Daftar NPM) -->
+  <dialog id="auth-dialog" class="modal auth-modal">
+    <button class="modal-close" data-close="auth-dialog" aria-label="Tutup">×</button>
+    <div class="modal-brand-header">
+      <div class="logo-symbol">UG</div>
+      <div>
+        <div class="logo-title">pasar<span class="logo-accent">kampus</span></div>
+        <small>KOMUNITAS UNIVERSITAS GUNADARMA</small>
+      </div>
+    </div>
+    <div class="auth-intro">
+      <h2 id="auth-title">Selamat Datang Kembali</h2>
+      <p id="auth-subtitle">Masuk dengan NPM Gunadarma untuk mulai jual beli dengan teman kampus.</p>
+    </div>
+    <div class="auth-switch">
+      <button class="active" data-auth-mode="login">Masuk Akun</button>
+      <button data-auth-mode="register">Daftar Baru</button>
+    </div>
+    <form id="auth-form">
+      <label>Nomor Pokok Mahasiswa (NPM)
+        <input name="npm" inputmode="numeric" autocomplete="username" placeholder="8 digit NPM (contoh: 50422001)" required maxlength="8">
+        <span class="field-hint">Wajib tepat 8 digit angka terdaftar di Gunadarma</span>
+      </label>
+      <div class="register-only hidden">
+        <label>Nama Lengkap (sesuai KTM)
+          <input name="fullName" autocomplete="name" maxlength="100" placeholder="Nama lengkapmu">
+        </label>
+      </div>
+      <div class="register-only hidden">
+        <label>Username Publik <span class="field-hint">opsional · untuk identitas di etalase</span>
+          <input name="username" autocomplete="nickname" maxlength="30" placeholder="contoh: budi_gunadarma">
+        </label>
+      </div>
+      <div class="register-only hidden">
+        <label>Nomor Telepon / WhatsApp
+          <input name="phone" autocomplete="tel" inputmode="tel" placeholder="08xxxxxxxxxx">
+          <span class="field-hint">🔒 Nomor telepon dirahasiakan dari publik untuk privasi</span>
+        </label>
+      </div>
+      <label>Kata Sandi
+        <input name="password" type="password" autocomplete="current-password" minlength="8" placeholder="Minimal 8 karakter" required>
+      </label>
+      <div class="form-error hidden" id="auth-error"></div>
+      <button class="btn btn-purple-gradient full-width" id="auth-submit" type="submit">Masuk</button>
+    </form>
+    <div class="auth-privacy-badge">
+      <span>🔒 Verifikasi aman terenkripsi BCRYPT · Data NPM dilindungi sistem internal</span>
+    </div>
+  </dialog>
+
+  <!-- 13. MODAL DIALOG: PASANG IKLAN BARANG (Listing Modal) -->
+  <dialog id="listing-dialog" class="modal form-modal">
+    <button class="modal-close" data-close="listing-dialog" aria-label="Tutup">×</button>
+    <div class="modal-heading">
+      <span class="section-eyebrow">ETALASE MAHASISWA</span>
+      <h2>Pasang Barang Preloved</h2>
+      <p class="modal-lead">Pasang iklan dengan jujur. Transaksi disepakati langsung lewat chat dan COD di kampus.</p>
+    </div>
+    <form id="listing-form">
+      <label>Nama Barang
+        <input name="title" required minlength="3" maxlength="150" placeholder="Contoh: Buku Algoritma & Struktur Data C++">
+      </label>
+      <label>Deskripsi & Kelengkapan
+        <textarea name="description" required maxlength="5000" rows="3" placeholder="Jelaskan kondisi fisik, ada coretan atau tidak, semester pemakaian, kelengkapan kabel/kotak..."></textarea>
+      </label>
+      <div class="form-row">
+        <label>Harga (Rp)
+          <input name="price" type="number" min="0" step="1000" required placeholder="50000">
+        </label>
+        <label>Kategori Barang
+          <select name="categoryId" required></select>
+        </label>
+      </div>
+      <div class="form-row">
+        <label>Kondisi Barang
+          <select name="itemCondition" required>
+            <option value="">Pilih kondisi...</option>
+            <option value="like_new">Seperti Baru (Mulus 95%+)</option>
+            <option value="good">Bagus (Fungsi normal, pemakaian wajar)</option>
+            <option value="fair">Layak (Ada tanda pemakaian/catatan)</option>
+            <option value="needs_repair">Perlu Perbaikan</option>
+          </select>
+        </label>
+        <label>Pilihan Lokasi COD Kampus <span class="field-hint">opsional</span>
+          <input name="meetupLocation" maxlength="150" placeholder="Contoh: Kantin Kampus D / Perpus Kampus E">
+        </label>
+      </div>
+      <label>Foto Barang <span class="field-hint">opsional · maks 4 foto, maks 5 MB per foto (JPG/PNG/WebP)</span>
+        <input name="images" type="file" accept="image/jpeg,image/png,image/webp" multiple>
+      </label>
+      <div class="form-error hidden" id="listing-error"></div>
+      <button class="btn btn-gold full-width" type="submit">Tayangkan Iklan Sekarang 🚀</button>
+    </form>
+  </dialog>
+
+  <!-- 14. MODAL DIALOG: DETAIL BARANG (Detail Modal) -->
+  <dialog id="detail-dialog" class="modal detail-modal">
+    <button class="modal-close" data-close="detail-dialog" aria-label="Tutup">×</button>
+    <div id="detail-content"></div>
+  </dialog>
+
+  <!-- 15. TOAST NOTIFICATION CONTAINER -->
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
