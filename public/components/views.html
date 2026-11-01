@@ -74,11 +74,25 @@
 
 <!-- 8. CHATS VIEW -->
 <section class="view-section hidden" id="chats-view">
-  <div class="section-header">
-    <h2 class="section-title">Pesan Obrolan</h2>
+  <div class="section-header flex-between">
+    <div>
+      <h2 class="section-title">Pesan Obrolan</h2>
+      <span class="section-subtitle">Pilih obrolan sebagai Pembeli atau Penjual</span>
+    </div>
   </div>
   <div class="chat-container">
-    <aside class="chat-sidebar" id="conversation-list"></aside>
+    <aside class="chat-sidebar">
+      <!-- 2 Pilihan Kategori Chat: Membeli vs Menjual -->
+      <div class="chat-role-tabs" style="display:flex; border-bottom:1px solid var(--color-border); background:var(--color-bg-body); padding:8px; gap:8px;">
+        <button type="button" class="chat-role-tab active" data-chat-role="buying" id="tab-chat-buying" style="flex:1; padding:8px 10px; font-size:12px; font-weight:700; border:none; border-radius:var(--radius-sm); cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; transition:all 0.2s; background:var(--color-primary); color:#fff;">
+          🛒 Saya Membeli <span id="count-role-buying" class="counter" style="background:rgba(255,255,255,0.25); color:#fff; font-size:11px; padding:2px 6px; border-radius:10px;">0</span>
+        </button>
+        <button type="button" class="chat-role-tab" data-chat-role="selling" id="tab-chat-selling" style="flex:1; padding:8px 10px; font-size:12px; font-weight:700; border:none; border-radius:var(--radius-sm); cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; transition:all 0.2s; background:transparent; color:var(--color-text-muted);">
+          🏷️ Saya Menjual <span id="count-role-selling" class="counter" style="background:var(--color-border); color:var(--color-text-main); font-size:11px; padding:2px 6px; border-radius:10px;">0</span>
+        </button>
+      </div>
+      <div id="conversation-list" style="overflow-y:auto; max-height:calc(560px - 53px);"></div>
+    </aside>
     <div class="chat-main" id="chat-window">
       <div class="chat-empty">
         <span>💬</span>

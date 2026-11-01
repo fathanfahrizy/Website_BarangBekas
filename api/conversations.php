@@ -20,8 +20,22 @@ function isConversationParticipant($pdo, $convId, $userId) {
 
 // 1. Ambil Daftar Percakapan Mahasiswa
 if ($method === 'GET' && !$id) {
+    $roleFilter = $_GET['role'] ?? null;
+    $whereSql = "WHERE ((co.buyer_id = ? AND co.deleted_by_buyer = 0) OR (co.seller_id = ? AND co.deleted_by_seller = 0))";
+    $params = [$userId, $userId, $userId, $userId];
+
+    if ($roleFilter === 'buying') {
+        $whereSql = "WHERE (co.buyer_id = ? AND co.deleted_by_buyer = 0)";
+        $params = [$userId, $userId, $userId];
+    } elseif ($roleFilter === 'selling') {
+        $whereSql = "WHERE (co.seller_id = ? AND co.deleted_by_seller = 0)";
+        $params = [$userId, $userId, $userId];
+    }
+
     $stmt = $pdo->prepare("
-        SELECT co.id, co.listing_id, l.title AS listing_title, l.status AS listing_status,
+        SELECT co.id, co.listing_id, co.buyer_id, co.seller_id,
+               l.title AS listing_title, l.status AS listing_status, l.price AS listing_price,
+               CASE WHEN co.buyer_id = ? THEN 'buying' ELSE 'selling' END AS role,
                CASE WHEN co.buyer_id = ? THEN COALESCE(s.username, s.full_name)
                     ELSE COALESCE(b.username, b.full_name) END AS other_name,
                (SELECT body FROM messages m WHERE m.conversation_id = co.id ORDER BY m.created_at DESC LIMIT 1) AS last_message,
@@ -30,13 +44,13 @@ if ($method === 'GET' && !$id) {
         JOIN listings l ON l.id = co.listing_id
         JOIN users b ON b.id = co.buyer_id
         JOIN users s ON s.id = co.seller_id
-        WHERE co.buyer_id = ? OR co.seller_id = ?
+        {$whereSql}
         ORDER BY COALESCE(
             (SELECT created_at FROM messages m WHERE m.conversation_id = co.id ORDER BY m.created_at DESC LIMIT 1),
             co.created_at
         ) DESC
     ");
-    $stmt->execute([$userId, $userId, $userId]);
+    $stmt->execute($params);
     jsonResponse(['conversations' => $stmt->fetchAll()]);
 }
 
@@ -85,12 +99,14 @@ if ($method === 'POST' && !$id) {
     $existing = $findConv->fetch();
 
     if ($existing) {
+        // Jika pembeli sebelumnya pernah menghapus obrolan ini, un-hide kembali untuk pembeli
+        $pdo->prepare("UPDATE conversations SET deleted_by_buyer = 0 WHERE id = ?")->execute([$existing['id']]);
         jsonResponse(['conversationId' => (int)$existing['id']], 201);
     }
 
     $insert = $pdo->prepare("
-        INSERT INTO conversations (listing_id, buyer_id, seller_id)
-        VALUES (?, ?, ?)
+        INSERT INTO conversations (listing_id, buyer_id, seller_id, deleted_by_buyer, deleted_by_seller)
+        VALUES (?, ?, ?, 0, 0)
     ");
     $insert->execute([$listingId, $userId, $listing['seller_id']]);
     jsonResponse(['conversationId' => (int)$pdo->lastInsertId()], 201);
@@ -116,6 +132,9 @@ if ($method === 'POST' && $id && $action === 'messages') {
     $stmt->execute([$id, $userId, $body]);
     $msgId = (int)$pdo->lastInsertId();
 
+    // Pulihkan percakapan agar terlihat kembali di kotak masuk kedua belah pihak
+    $pdo->prepare("UPDATE conversations SET deleted_by_buyer = 0, deleted_by_seller = 0 WHERE id = ?")->execute([$id]);
+
     $getMsg = $pdo->prepare("
         SELECT id, body, created_at, sender_id 
         FROM messages 
@@ -123,6 +142,30 @@ if ($method === 'POST' && $id && $action === 'messages') {
     ");
     $getMsg->execute([$msgId]);
     jsonResponse(['message' => $getMsg->fetch()], 201);
+}
+
+// 5. Hapus Percakapan / Obrolan (HANYA untuk akun yang sedang login)
+if (($method === 'DELETE' && $id) || ($method === 'POST' && $id && $action === 'delete')) {
+    $stmt = $pdo->prepare("SELECT id, buyer_id, seller_id, deleted_by_buyer, deleted_by_seller FROM conversations WHERE id = ? AND (buyer_id = ? OR seller_id = ?)");
+    $stmt->execute([$id, $userId, $userId]);
+    $conv = $stmt->fetch();
+
+    if (!$conv) {
+        jsonResponse(['error' => 'Percakapan tidak ditemukan atau Anda tidak memiliki akses.'], 404);
+    }
+
+    if ((int)$conv['buyer_id'] === $userId) {
+        // Tandai dihapus hanya untuk pembeli
+        $pdo->prepare("UPDATE conversations SET deleted_by_buyer = 1 WHERE id = ?")->execute([$id]);
+    } else {
+        // Tandai dihapus hanya untuk penjual
+        $pdo->prepare("UPDATE conversations SET deleted_by_seller = 1 WHERE id = ?")->execute([$id]);
+    }
+
+    // Jika KEDUA belah pihak (pembeli & penjual) sudah sama-sama menghapus, barulah obrolan dihapus permanen
+    $pdo->prepare("DELETE FROM conversations WHERE id = ? AND deleted_by_buyer = 1 AND deleted_by_seller = 1")->execute([$id]);
+
+    jsonResponse(['success' => true, 'message' => 'Obrolan berhasil dihapus dari kotak masuk akun Anda.']);
 }
 
 jsonResponse(['error' => 'Endpoint chat tidak valid.'], 404);

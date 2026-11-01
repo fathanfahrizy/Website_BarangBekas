@@ -117,6 +117,8 @@ CREATE TABLE IF NOT EXISTS conversations (
     listing_id BIGINT NOT NULL,
     buyer_id BIGINT NOT NULL,
     seller_id BIGINT NOT NULL,
+    deleted_by_buyer TINYINT(1) NOT NULL DEFAULT 0,
+    deleted_by_seller TINYINT(1) NOT NULL DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE KEY uq_conversation (listing_id, buyer_id, seller_id),
     FOREIGN KEY (listing_id) REFERENCES listings(id) ON DELETE CASCADE,

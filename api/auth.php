@@ -25,7 +25,7 @@ if ($action === 'register' && $method === 'POST') {
     $phone         = preg_replace('/[\s-]/', '', (string)($input['phone'] ?? ''));
     $password      = (string)($input['password'] ?? '');
     $usernameInput = trim((string)($input['username'] ?? ''));
-    $username      = !empty($usernameInput) ? $usernameInput : null;
+    $username      = !empty($usernameInput) ? preg_replace('/\s+/', ' ', $usernameInput) : null;
 
     // Validasi aturan NPM Gunadarma
     $npmError = validateNpm($npm);
@@ -37,8 +37,8 @@ if ($action === 'register' && $method === 'POST') {
         jsonResponse(['error' => 'Nama harus berisi 2–100 karakter.'], 400);
     }
 
-    if ($username && !preg_match('/^[A-Za-z0-9_]{3,30}$/', $username)) {
-        jsonResponse(['error' => 'Username harus 3–30 karakter: huruf, angka, atau garis bawah.'], 400);
+    if ($username && (mb_strlen($username) < 3 || mb_strlen($username) > 30 || !preg_match('/^[\p{L}\p{N} _.-]{3,30}$/u', $username))) {
+        jsonResponse(['error' => 'Username harus 3–30 karakter (huruf, angka, spasi, titik, strip, atau garis bawah).'], 400);
     }
 
     if (!preg_match('/^08\d{8,11}$/', $phone)) {
@@ -136,15 +136,15 @@ if ($action === 'profile' && ($method === 'PUT' || $method === 'POST')) {
 
     $fullName      = trim((string)($input['fullName'] ?? ''));
     $usernameInput = trim((string)($input['username'] ?? ''));
-    $username      = !empty($usernameInput) ? $usernameInput : null;
+    $username      = !empty($usernameInput) ? preg_replace('/\s+/', ' ', $usernameInput) : null;
     $phone         = preg_replace('/[\s-]/', '', (string)($input['phone'] ?? ''));
 
     if (mb_strlen($fullName) < 2 || mb_strlen($fullName) > 100) {
         jsonResponse(['error' => 'Nama harus berisi 2–100 karakter.'], 400);
     }
 
-    if ($username && !preg_match('/^[A-Za-z0-9_]{3,30}$/', $username)) {
-        jsonResponse(['error' => 'Username harus 3–30 karakter: huruf, angka, atau garis bawah.'], 400);
+    if ($username && (mb_strlen($username) < 3 || mb_strlen($username) > 30 || !preg_match('/^[\p{L}\p{N} _.-]{3,30}$/u', $username))) {
+        jsonResponse(['error' => 'Username harus 3–30 karakter (huruf, angka, spasi, titik, strip, atau garis bawah).'], 400);
     }
 
     if (!preg_match('/^08\d{8,11}$/', $phone)) {

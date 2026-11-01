@@ -74,6 +74,11 @@ if (preg_match('#^/api/conversations/(\d+)/messages$#', $apiPath, $matches)) {
     require __DIR__ . '/conversations.php';
     exit;
 }
+if (preg_match('#^/api/conversations/(\d+)$#', $apiPath, $matches)) {
+    $_GET['id'] = (int)$matches[1];
+    require __DIR__ . '/conversations.php';
+    exit;
+}
 
 // 5. Rute Cleanup
 if ($apiPath === '/api/cleanup') {
