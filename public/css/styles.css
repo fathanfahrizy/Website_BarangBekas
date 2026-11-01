@@ -113,14 +113,7 @@ h1, h2, h3, h4 { font-family: var(--font-display); line-height: 1.15; }
   
   transition: transform 0.08s, box-shadow 0.08s, background-color 0.08s;
 }
-.btn:hover,
-.btn-outline:hover,
-.btn-danger-outline:hover {
-}
-.btn:active,
-.btn-outline:active,
-.btn-danger-outline:active {
-}
+
 .btn:disabled,
 .btn-outline:disabled {
   background: var(--color-bg-body);
@@ -477,7 +470,7 @@ h1, h2, h3, h4 { font-family: var(--font-display); line-height: 1.15; }
 }
 .listing-card:hover { z-index: 2; }
 .listing-card:hover img { transform: none !important; }
-.listing-card:active { }
+
 
 /* Jembatan untuk style inline di app.js (hapus kalau JS sudah dirapikan) */
 .listing-card div[style*="font-size:18px"] { font-family: var(--font-display); font-weight: 800 !important; font-size: 20px !important; }
@@ -546,7 +539,7 @@ h1, h2, h3, h4 { font-family: var(--font-display); line-height: 1.15; }
 }
 textarea.form-input { height: auto; padding: 12px 14px; resize: vertical; line-height: 1.5; }
 select.form-input { appearance: none; }
-.form-input:focus { }
+
 .form-input::placeholder { color: var(--color-text-light); }
 .input-disabled { background: var(--color-bg-body); color: var(--color-text-muted); cursor: not-allowed; }
 .form-actions { display: flex; flex-wrap: wrap; gap: 14px; }
