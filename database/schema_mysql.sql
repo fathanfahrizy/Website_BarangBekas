@@ -136,3 +136,94 @@ CREATE TABLE IF NOT EXISTS messages (
     FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE CASCADE,
     FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 9. Tabel Alamat Pengiriman (Untuk fitur Beli Online & Diantar)
+CREATE TABLE IF NOT EXISTS shipping_addresses (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    recipient_name VARCHAR(100) NOT NULL,
+    phone VARCHAR(15) NOT NULL,
+    province VARCHAR(100) NOT NULL,
+    city VARCHAR(100) NOT NULL,
+    district VARCHAR(100) NOT NULL,
+    postal_code VARCHAR(10) NOT NULL,
+    full_address TEXT NOT NULL,
+    is_default TINYINT(1) DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 10. Tabel Keranjang Belanja (Cart)
+CREATE TABLE IF NOT EXISTS carts (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    listing_id BIGINT NOT NULL,
+    quantity INT NOT NULL DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (listing_id) REFERENCES listings(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_cart_item (user_id, listing_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 11. Tabel Pesanan Utama (Orders)
+CREATE TABLE IF NOT EXISTS orders (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    order_number VARCHAR(50) NOT NULL UNIQUE,
+    buyer_id BIGINT NOT NULL,
+    subtotal DECIMAL(15, 2) NOT NULL DEFAULT 0,
+    shipping_cost DECIMAL(15, 2) NOT NULL DEFAULT 0,
+    total_amount DECIMAL(15, 2) NOT NULL DEFAULT 0,
+    status ENUM('pending', 'paid', 'processing', 'shipped', 'completed', 'cancelled') NOT NULL DEFAULT 'pending',
+    payment_method VARCHAR(50) DEFAULT NULL,
+    shipping_address_id BIGINT DEFAULT NULL,
+    courier_service VARCHAR(100) DEFAULT NULL,
+    tracking_number VARCHAR(100) DEFAULT NULL,
+    notes TEXT DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    paid_at TIMESTAMP NULL DEFAULT NULL,
+    FOREIGN KEY (buyer_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (shipping_address_id) REFERENCES shipping_addresses(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 12. Tabel Item Pesanan (Order Items - Snapshot harga & status per barang)
+CREATE TABLE IF NOT EXISTS order_items (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    order_id BIGINT NOT NULL,
+    listing_id BIGINT NOT NULL,
+    seller_id BIGINT NOT NULL,
+    price_at_purchase DECIMAL(15, 2) NOT NULL,
+    quantity INT NOT NULL DEFAULT 1,
+    item_status ENUM('pending', 'processing', 'shipped', 'completed', 'cancelled') NOT NULL DEFAULT 'pending',
+    FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
+    FOREIGN KEY (listing_id) REFERENCES listings(id) ON DELETE RESTRICT,
+    FOREIGN KEY (seller_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 13. Tabel Pembayaran (Integrasi Payment Gateway seperti Midtrans)
+CREATE TABLE IF NOT EXISTS payments (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    order_id BIGINT NOT NULL,
+    transaction_id VARCHAR(100) UNIQUE DEFAULT NULL,
+    payment_type VARCHAR(50) DEFAULT NULL,
+    gross_amount DECIMAL(15, 2) NOT NULL,
+    status VARCHAR(50) NOT NULL DEFAULT 'pending',
+    payment_url TEXT DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 14. Tabel Review & Rating (Opsional tapi bagus untuk Trust)
+CREATE TABLE IF NOT EXISTS reviews (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    order_item_id BIGINT NOT NULL,
+    buyer_id BIGINT NOT NULL,
+    seller_id BIGINT NOT NULL,
+    rating TINYINT NOT NULL CHECK (rating BETWEEN 1 AND 5),
+    comment TEXT DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (order_item_id) REFERENCES order_items(id) ON DELETE CASCADE,
+    FOREIGN KEY (buyer_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (seller_id) REFERENCES users(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_review (order_item_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
