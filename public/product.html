@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detail Barang - PasarKampus Gunadarma</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        body.product-page { background: var(--color-bg-body); }
+        .product-container { max-width: 1200px; margin: 0 auto; padding: 24px 20px 80px; }
+        .breadcrumb { margin-bottom: 24px; font-family: var(--font-mono); font-size: 12px; color: var(--color-text-muted); }
+        .breadcrumb a { color: var(--color-primary); text-decoration: none; }
+        .breadcrumb a:hover { text-decoration: underline; }
+        .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; border: 1px solid var(--color-border); background: var(--color-bg-card); padding: 32px; }
+        .product-gallery { position: relative; }
+        .main-image { width: 100%; height: 500px; background: var(--color-bg-body); border: 1px solid var(--color-border); display: grid; place-items: center; overflow: hidden; }
+        .main-image img { width: 100%; height: 100%; object-fit: cover; }
+        .main-image .no-image { font-size: 80px; color: var(--color-text-light); }
+        .thumbnail-list { display: flex; gap: 8px; margin-top: 12px; overflow-x: auto; }
+        .thumbnail { width: 80px; height: 80px; border: 2px solid var(--color-border); cursor: pointer; flex-shrink: 0; }
+        .thumbnail.active { border-color: var(--color-primary); }
+        .thumbnail img { width: 100%; height: 100%; object-fit: cover; }
+        .product-info { display: flex; flex-direction: column; }
+        .product-category { font-family: var(--font-mono); font-size: 11px; font-weight: 600; color: var(--color-primary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+        .product-title { font-family: var(--font-display); font-size: 32px; font-weight: 800; color: var(--color-text-main); line-height: 1.2; margin-bottom: 16px; }
+        .product-price { font-family: var(--font-display); font-size: 36px; font-weight: 900; color: var(--color-primary-dark); margin-bottom: 24px; }
+        .product-meta { background: var(--color-bg-body); padding: 16px; border: 1px solid var(--color-border); margin-bottom: 24px; }
+        .meta-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--color-border); font-size: 14px; }
+        .meta-item:last-child { border-bottom: none; }
+        .meta-label { color: var(--color-text-muted); font-family: var(--font-mono); font-size: 12px; }
+        .meta-value { font-weight: 600; }
+        .product-description { font-size: 15px; line-height: 1.7; color: var(--color-text-main); margin-bottom: 32px; max-height: 300px; overflow-y: auto; padding-right: 16px; }
+        .seller-card { display: flex; align-items: center; gap: 16px; padding: 20px; background: var(--color-bg-body); border: 1px solid var(--color-border); margin-bottom: 24px; }
+        .seller-avatar { width: 56px; height: 56px; border-radius: 50%; overflow: hidden; background: var(--color-primary-subtle); color: var(--color-primary); display: grid; place-items: center; font-family: var(--font-display); font-weight: 800; font-size: 24px; flex-shrink: 0; }
+        .seller-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .seller-info { flex: 1; }
+        .seller-name { font-weight: 700; font-size: 16px; margin-bottom: 4px; }
+        .seller-badge { font-family: var(--font-mono); font-size: 11px; color: var(--color-text-muted); }
+        .action-buttons { display: flex; gap: 12px; margin-top: auto; }
+        .btn-chat { flex: 1; height: 48px; font-size: 14px; font-weight: 700; }
+        .btn-back { height: 48px; padding: 0 24px; }
+        .sold-badge { display: inline-block; padding: 6px 12px; background: var(--color-danger); color: #fff; font-family: var(--font-mono); font-size: 12px; font-weight: 700; margin-bottom: 16px; }
+        .loading-state { text-align: center; padding: 80px 20px; color: var(--color-text-muted); }
+        .error-state { text-align: center; padding: 80px 20px; }
+        .error-state h2 { color: var(--color-danger); margin-bottom: 16px; }
+        @media (max-width: 768px) {
+            .product-grid { grid-template-columns: 1fr; padding: 20px; gap: 24px; }
+            .main-image { height: 350px; }
+            .product-title { font-size: 24px; }
+            .product-price { font-size: 28px; }
+        }
+    </style>
+</head>
+<body class="product-page">
+    <div class="product-container">
+        <div class="breadcrumb">
+            <a href="/">🏠 Beranda</a> / <span id="breadcrumb-category">Memuat...</span>
+        </div>
+
+        <div id="product-content">
+            <div class="loading-state">
+                <div style="font-size: 48px; margin-bottom: 16px;">⏳</div>
+                <p>Memuat detail barang...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const $ = (s) => document.querySelector(s);
+        const $$ = (s) => [...document.querySelectorAll(s)];
+
+        function escapeHtml(value = "") {
+            return String(value).replace(/[&<>"']/g, (c) => ({
+                "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+            })[c]);
+        }
+
+        function formatPrice(value) {
+            return `Rp${Number(value).toLocaleString("id-ID")}`;
+        }
+
+        const conditionNames = {
+            needs_repair: "Perlu perbaikan",
+            fair: "Layak",
+            good: "Bagus",
+            like_new: "Seperti baru",
+        };
+
+        async function loadProduct() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const productId = urlParams.get('id');
+
+            if (!productId) {
+                $('#product-content').innerHTML = `
+                    <div class="error-state">
+                        <h2>❌ Barang Tidak Ditemukan</h2>
+                        <p>ID produk tidak valid.</p>
+                        <a href="/" class="btn btn-primary" style="margin-top: 24px; display: inline-block;">Kembali ke Beranda</a>
+                    </div>
+                `;
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/listings/${encodeURIComponent(productId)}`);
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Barang tidak ditemukan.');
+                }
+
+                const listing = data.listing;
+                const images = listing.images || [];
+                const isSold = listing.status === 'sold';
+
+                // Update breadcrumb
+                $('#breadcrumb-category').textContent = listing.category || 'Kategori';
+
+                // Render product
+                const mainImage = images[0] 
+                    ? `<img src="${escapeHtml(images[0])}" alt="${escapeHtml(listing.title)}">`
+                    : `<div class="no-image">📦</div>`;
+
+                const thumbnails = images.length > 1 
+                    ? `<div class="thumbnail-list">
+                        ${images.map((url, idx) => `
+                            <div class="thumbnail ${idx === 0 ? 'active' : ''}" data-img-url="${escapeHtml(url)}">
+                                <img src="${escapeHtml(url)}" alt="">
+                            </div>
+                        `).join('')}
+                    </div>`
+                    : '';
+
+                const sellerAvatar = listing.seller_avatar
+                    ? `<div class="seller-avatar"><img src="${escapeHtml(listing.seller_avatar)}" alt=""></div>`
+                    : `<div class="seller-avatar">${escapeHtml((listing.seller_name || '?').charAt(0).toUpperCase())}</div>`;
+
+                const actionButton = isSold
+                    ? `<button class="btn btn-outline btn-chat" disabled>Barang Sudah Terjual</button>`
+                    : `<button class="btn btn-primary btn-chat" id="btn-chat-seller">💬 Chat Penjual & Janji COD</button>`;
+
+                $('#product-content').innerHTML = `
+                    <div class="product-grid">
+                        <div class="product-gallery">
+                            <div class="main-image" id="main-image">
+                                ${mainImage}
+                            </div>
+                            ${thumbnails}
+                        </div>
+
+                        <div class="product-info">
+                            ${isSold ? '<div class="sold-badge">TERJUAL</div>' : ''}
+                            <div class="product-category">${escapeHtml(listing.category)}</div>
+                            <h1 class="product-title">${escapeHtml(listing.title)}</h1>
+                            <div class="product-price">${formatPrice(listing.price)}</div>
+
+                            <div class="product-meta">
+                                <div class="meta-item">
+                                    <span class="meta-label">Kondisi</span>
+                                    <span class="meta-value">${escapeHtml(conditionNames[listing.item_condition] || listing.item_condition)}</span>
+                                </div>
+                                <div class="meta-item">
+                                    <span class="meta-label">Lokasi COD</span>
+                                    <span class="meta-value">${escapeHtml(listing.meetup_location || 'Disepakati lewat chat')}</span>
+                                </div>
+                                <div class="meta-item">
+                                    <span class="meta-label">Dipasang</span>
+                                    <span class="meta-value">${new Date(listing.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                                </div>
+                            </div>
+
+                            <h3 style="font-family: var(--font-display); font-size: 18px; margin-bottom: 12px;">Deskripsi Barang</h3>
+                            <div class="product-description">
+                                ${escapeHtml(listing.description).replace(/\n/g, '<br>')}
+                            </div>
+
+                            <div class="seller-card">
+                                ${sellerAvatar}
+                                <div class="seller-info">
+                                    <div class="seller-name">${escapeHtml(listing.seller_name)}</div>
+                                    <div class="seller-badge">Mahasiswa Gunadarma</div>
+                                </div>
+                            </div>
+
+                            <div class="action-buttons">
+                                <a href="/" class="btn btn-outline btn-back">← Kembali</a>
+                                ${actionButton}
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // Thumbnail click handler
+                $$('.thumbnail').forEach(thumb => {
+                    thumb.addEventListener('click', () => {
+                        const newSrc = thumb.dataset.imgUrl;
+                        $('#main-image').innerHTML = `<img src="${newSrc}" alt="${escapeHtml(listing.title)}">`;
+                        $$('.thumbnail').forEach(t => t.classList.remove('active'));
+                        thumb.classList.add('active');
+                    });
+                });
+
+                // Chat button handler
+                const chatBtn = $('#btn-chat-seller');
+                if (chatBtn) {
+                    chatBtn.addEventListener('click', async () => {
+                        // Cek login status dulu
+                        const meRes = await fetch('/api/me');
+                        const meData = await meRes.json();
+                        
+                        if (!meData.user) {
+                            window.location.href = `login.html?mode=login&redirect=product.html?id=${productId}`;
+                            return;
+                        }
+
+                        // Mulai conversation
+                        try {
+                            const convRes = await fetch('/api/conversations', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ listingId: productId })
+                            });
+                            const convData = await convRes.json();
+                            
+                            if (!convRes.ok) throw new Error(convData.error);
+                            
+                            // Redirect ke halaman chat
+                            window.location.href = `/?view=chats&conversation=${convData.conversationId}`;
+                        } catch (err) {
+                            alert(err.message || 'Gagal memulai chat.');
+                        }
+                    });
+                }
+
+            } catch (error) {
+                $('#product-content').innerHTML = `
+                    <div class="error-state">
+                        <h2>❌ ${escapeHtml(error.message)}</h2>
+                        <p>Barang yang kamu cari tidak tersedia atau sudah dihapus.</p>
+                        <a href="/" class="btn btn-primary" style="margin-top: 24px; display: inline-block;">Kembali ke Beranda</a>
+                    </div>
+                `;
+            }
+        }
+
+        // Load product on page load
+        loadProduct();
+    </script>
+</body>
+</html>

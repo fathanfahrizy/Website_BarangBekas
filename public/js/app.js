@@ -266,96 +266,8 @@ function showError(error) {
 }
 
 function showListing(id) {
-  api(`/api/listings/${encodeURIComponent(id)}`).then(({ listing }) => {
-    const isOwn = state.user && String(state.user.id) === String(listing.seller_id);
-    const sold = listing.status === "sold";
-    const images = listing.images || [];
-    const mainImg = images[0]
-      ? `<img id="detail-main-img" src="${escapeHtml(images[0])}" style="width:100%; height:100%; object-fit:cover; border-radius:var(--radius-md);" alt="${escapeHtml(listing.title)}">`
-      : `<div style="width:100%; height:100%; display:grid; place-items:center; background:var(--color-bg-body); font-size:48px;">📦</div>`;
-
-    const thumbs = images.length > 1 ? `
-      <div style="display:flex; gap:6px; margin-top:8px; overflow-x:auto;">
-        ${images.map((url, idx) => `
-          <img src="${escapeHtml(url)}" data-img-url="${escapeHtml(url)}" class="detail-gallery-thumb" style="width:52px; height:52px; object-fit:cover; border-radius:var(--radius-sm); cursor:pointer; border:2px solid ${idx === 0 ? 'var(--color-primary)' : 'var(--color-border)'};" alt="">
-        `).join("")}
-      </div>
-    ` : '';
-    
-    const sellerAvatar = listing.seller_avatar
-      ? `<div style="width:40px; height:40px; border-radius:50%; overflow:hidden;"><img src="${escapeHtml(listing.seller_avatar)}" style="width:100%; height:100%; object-fit:cover;" alt=""></div>`
-      : `<div style="width:40px; height:40px; border-radius:50%; background:var(--color-primary-subtle); color:var(--color-primary); display:grid; place-items:center; font-weight:bold;">${escapeHtml(listing.seller_name.charAt(0).toUpperCase())}</div>`;
-
-    const actionMarkup = isOwn ? `
-      <div style="display:flex; gap:8px;">
-        <button class="btn btn-primary" style="flex:1;" id="detail-edit-btn" data-edit-id="${escapeHtml(listing.id)}">✏️ Edit Barang</button>
-        <button class="btn btn-outline" style="color:#ef4444; border-color:#ef4444; padding:0 16px;" id="detail-delete-btn" data-delete-id="${escapeHtml(listing.id)}" title="Hapus Barang dari Etalase">🗑️ Hapus</button>
-      </div>
-    ` : sold ? `
-      <button class="btn btn-outline w-full" disabled>Barang sudah terjual</button>
-    ` : `
-      <button class="btn btn-primary w-full" id="chat-seller">💬 Chat Penjual & Janji COD</button>
-    `;
-
-    $("#detail-content").innerHTML = `
-      <div style="display:grid; grid-template-columns:300px 1fr; gap:32px;">
-        <div>
-          <div style="height:300px; background:var(--color-bg-body); border-radius:var(--radius-md); overflow:hidden;">${mainImg}</div>
-          ${thumbs}
-        </div>
-        <div style="display:flex; flex-direction:column;">
-          <span style="font-size:11px; font-weight:800; color:var(--color-primary); letter-spacing:1px; text-transform:uppercase;">${escapeHtml(listing.category)}${sold ? " · TERJUAL" : ""}</span>
-          <h2 style="font-size:24px; font-weight:700; color:var(--color-text-main); line-height:1.3; margin:8px 0 12px;">${escapeHtml(listing.title)}</h2>
-          <div style="font-size:28px; font-weight:800; color:var(--color-primary-dark); margin-bottom:16px;">${formatPrice(listing.price)}</div>
-          
-          <div style="background:var(--color-bg-body); padding:16px; border-radius:var(--radius-md); font-size:13px; margin-bottom:20px; display:flex; flex-direction:column; gap:8px;">
-            <div>Kondisi: <strong>${escapeHtml(conditionNames[listing.item_condition])}</strong></div>
-            <div>Meetup COD: <strong>${escapeHtml(listing.meetup_location || "Disepakati lewat chat")}</strong></div>
-          </div>
-          
-          <p style="font-size:14px; color:var(--color-text-muted); line-height:1.6; margin-bottom:24px; max-height:150px; overflow-y:auto;">${escapeHtml(listing.description).replace(/\n/g, '<br>')}</p>
-          
-          <div style="display:flex; align-items:center; gap:12px; margin-bottom:24px; padding-top:16px; border-top:1px solid var(--color-border);">
-            ${sellerAvatar}
-            <div style="display:flex; flex-direction:column;">
-              <strong style="font-size:14px;">${escapeHtml(listing.seller_name)}</strong>
-              <span class="text-xs text-gray">Mahasiswa Gunadarma</span>
-            </div>
-          </div>
-          
-          <div style="margin-top:auto;">
-            ${actionMarkup}
-          </div>
-        </div>
-      </div>
-    `;
-    
-    // Sesuaikan layout modal detail untuk mobile
-    if (window.innerWidth < 768) {
-      const detailGrid = $("#detail-content > div");
-      if (detailGrid) detailGrid.style.gridTemplateColumns = "1fr";
-    }
-
-    // Gallery thumbnail switcher
-    $("#detail-content").querySelectorAll(".detail-gallery-thumb").forEach((thumb) => {
-      thumb.addEventListener("click", () => {
-        const main = $("#detail-main-img");
-        if (main) main.src = thumb.dataset.imgUrl;
-        $("#detail-content").querySelectorAll(".detail-gallery-thumb").forEach(t => t.style.borderColor = "var(--color-border)");
-        thumb.style.borderColor = "var(--color-primary)";
-      });
-    });
-
-    const editBtn = $("#detail-edit-btn");
-    if (editBtn) editBtn.addEventListener("click", () => openEditListing(editBtn.dataset.editId));
-
-    const delBtn = $("#detail-delete-btn");
-    if (delBtn) delBtn.addEventListener("click", () => deleteListing(delBtn.dataset.deleteId));
-
-    $("#detail-dialog").showModal();
-    const chatButton = $("#chat-seller");
-    if (chatButton) chatButton.addEventListener("click", () => startConversation(listing.id));
-  }).catch(showError);
+  // Redirect ke halaman product terpisah
+  window.location.href = `product.html?id=${encodeURIComponent(id)}`;
 }
 
 let editDeletedImages = [];
@@ -1020,6 +932,26 @@ if (profileAvatar) {
     const photoContainer = $("#profile-photo");
     if (photoContainer) photoContainer.innerHTML = `<img src="${URL.createObjectURL(file)}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;" alt="Pratinjau foto profil">`;
   });
+}
+
+// Handle URL parameters untuk redirect dari product page ke chat
+const urlParams = new URLSearchParams(window.location.search);
+const viewParam = urlParams.get('view');
+const conversationParam = urlParams.get('conversation');
+
+if (viewParam === 'chats' && conversationParam) {
+  // Tunggu user login dan conversations load, lalu buka conversation
+  const originalRefreshConversations = refreshConversations;
+  refreshConversations = async function() {
+    await originalRefreshConversations();
+    if (state.user && state.conversations.length > 0) {
+      const exists = state.conversations.some(c => String(c.id) === String(conversationParam));
+      if (exists) {
+        switchView('chats');
+        setTimeout(() => openConversation(conversationParam), 100);
+      }
+    }
+  };
 }
 
 async function initialize() {
