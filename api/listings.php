@@ -51,7 +51,8 @@ if ($method === 'GET' && $id) {
 if ($method === 'GET' && !$id) {
     $params = [];
     $filters = [];
-
+    
+    // Filter Dasar
     if (!empty($_GET['mine']) && $_GET['mine'] === 'true') {
         $userId = requireAuth();
         $params[] = $userId;
@@ -60,14 +61,7 @@ if ($method === 'GET' && !$id) {
         $filters[] = "(l.status = 'active' OR (l.status = 'sold' AND l.sold_at > NOW() - INTERVAL 3 DAY))";
     }
 
-    if (!empty($_GET['category'])) {
-        $catId = (int)$_GET['category'];
-        if ($catId > 0) {
-            $params[] = $catId;
-            $filters[] = "l.category_id = ?";
-        }
-    }
-
+    // 1. Keyword Search
     if (!empty($_GET['q'])) {
         $keyword = '%' . trim(mb_substr($_GET['q'], 0, 100)) . '%';
         $params[] = $keyword;
@@ -75,13 +69,50 @@ if ($method === 'GET' && !$id) {
         $filters[] = "(l.title LIKE ? OR l.description LIKE ?)";
     }
 
-    $whereClause = !empty($filters) ? 'WHERE ' . implode(' AND ', $filters) : '';
-    $query = "{$listingSelect} {$whereClause} ORDER BY l.created_at DESC LIMIT 100";
+    // 2. Filter Kategori
+    if (!empty($_GET['category'])) {
+        $params[] = (int)$_GET['category'];
+        $filters[] = "l.category_id = ?";
+    }
 
+    // 3. Filter Harga
+    if (isset($_GET['min_price']) && $_GET['min_price'] !== '') {
+        $params[] = (float)$_GET['min_price'];
+        $filters[] = "l.price >= ?";
+    }
+    if (isset($_GET['max_price']) && $_GET['max_price'] !== '') {
+        $params[] = (float)$_GET['max_price'];
+        $filters[] = "l.price <= ?";
+    }
+
+    // 4. Filter Kondisi
+    if (!empty($_GET['condition']) && array_key_exists($_GET['condition'], CONDITION_LABELS)) {
+        $params[] = $_GET['condition'];
+        $filters[] = "l.item_condition = ?";
+    }
+
+    // 5. Filter Lokasi
+    if (!empty($_GET['location'])) {
+        $loc = '%' . trim(mb_substr($_GET['location'], 0, 100)) . '%';
+        $params[] = $loc;
+        $filters[] = "l.meetup_location LIKE ?";
+    }
+
+    $whereClause = !empty($filters) ? 'WHERE ' . implode(' AND ', $filters) : '';
+
+    // 6. Sorting
+    $sortBy = $_GET['sort'] ?? 'newest';
+    $orderBy = "l.created_at DESC"; 
+    if ($sortBy === 'price_asc') $orderBy = "l.price ASC";
+    if ($sortBy === 'price_desc') $orderBy = "l.price DESC";
+    if ($sortBy === 'oldest') $orderBy = "l.created_at ASC";
+
+    $query = "{$listingSelect} {$whereClause} ORDER BY {$orderBy} LIMIT 100";
+    
     $stmt = $pdo->prepare($query);
     $stmt->execute($params);
     $listings = $stmt->fetchAll();
-
+    
     jsonResponse(['listings' => $listings]);
 }
 
