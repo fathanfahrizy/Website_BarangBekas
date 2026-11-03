@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Masuk / Daftar - PasarKampus Gunadarma</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        /* Override khusus halaman auth agar full screen & terpusat */
+        body.auth-page { background-color: var(--color-bg-body); display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+        .auth-wrapper { width: 100%; max-width: 440px; }
+        .auth-brand-link { display: flex; align-items: center; gap: 12px; margin-bottom: 32px; text-decoration: none; }
+        .auth-card { background: var(--color-bg-card); border: 1px solid var(--color-border); padding: 32px; }
+        .auth-header { text-align: center; margin-bottom: 24px; }
+        .auth-header h1 { font-size: 24px; margin-bottom: 8px; }
+        .auth-header p { font-size: 14px; color: var(--color-text-muted); }
+    </style>
+</head>
+<body class="auth-page">
+    <div class="auth-wrapper">
+        <a href="index.html" class="auth-brand-link">
+            <div class="brand-icon" style="width:40px;height:40px;font-size:16px;">UG</div>
+            <span class="brand-name" style="font-size:20px;">pasar<strong>kampus</strong></span>
+        </a>
+
+        <div class="auth-card">
+            <div class="auth-header">
+                <h1 id="auth-title">Selamat Datang Kembali</h1>
+                <p id="auth-subtitle">Masuk dengan NPM Gunadarma.</p>
+            </div>
+
+            <div class="auth-tabs" style="display:flex; margin-bottom:24px; border:1px solid var(--color-border);">
+                <button class="auth-tab active" data-mode="login" style="flex:1; padding:10px; font-weight:600; background:var(--color-primary); color:#fff; border:none; cursor:pointer;">Masuk</button>
+                <button class="auth-tab" data-mode="register" style="flex:1; padding:10px; font-weight:600; background:var(--color-bg-body); color:var(--color-text-main); border:none; border-left:1px solid var(--color-border); cursor:pointer;">Daftar</button>
+            </div>
+
+            <form id="auth-form">
+                <div class="form-group">
+                    <label style="font-size:12px; font-weight:600; margin-bottom:6px; display:block;">NPM (8 Digit)</label>
+                    <input name="npm" class="form-input" inputmode="numeric" required maxlength="8" placeholder="Contoh: 50422001" style="width:100%; box-sizing:border-box;">
+                </div>
+                
+                <div class="register-only hidden form-group">
+                    <label style="font-size:12px; font-weight:600; margin-bottom:6px; display:block;">Nama Lengkap</label>
+                    <input name="fullName" class="form-input" maxlength="100" placeholder="Sesuai KTM" style="width:100%; box-sizing:border-box;">
+                </div>
+                
+                <div class="register-only hidden form-group">
+                    <label style="font-size:12px; font-weight:600; margin-bottom:6px; display:block;">Nomor WhatsApp</label>
+                    <input name="phone" class="form-input" inputmode="tel" placeholder="08xxxxxxxxxx" style="width:100%; box-sizing:border-box;">
+                </div>
+
+                <div class="form-group">
+                    <label style="font-size:12px; font-weight:600; margin-bottom:6px; display:block;">Kata Sandi</label>
+                    <input name="password" class="form-input" type="password" minlength="8" required placeholder="Minimal 8 karakter" style="width:100%; box-sizing:border-box;">
+                </div>
+
+                <div class="error-msg hidden" id="auth-error" style="padding:10px; background:#f8e3e4; color:var(--color-danger); border:1px solid var(--color-danger); font-size:12px; margin-top:16px;"></div>
+                
+                <button class="btn btn-primary w-full" id="auth-submit" type="submit" style="width:100%; margin-top:24px; height:44px; font-weight:700;">Masuk</button>
+            </form>
+        </div>
+        
+        <p style="text-align:center; margin-top:24px; font-size:12px; color:var(--color-text-muted);">
+            Dengan masuk, Anda menyetujui aturan komunitas PasarKampus UG.
+        </p>
+    </div>
+
+    <script>
+        const $ = (s) => document.querySelector(s);
+        const $$ = (s) => [...document.querySelectorAll(s)];
+        let mode = 'login';
+
+        $$('.auth-tab').forEach(btn => {
+            btn.addEventListener('click', () => {
+                mode = btn.dataset.mode;
+                $$('.auth-tab').forEach(b => {
+                    const isActive = b.dataset.mode === mode;
+                    b.style.background = isActive ? 'var(--color-primary)' : 'var(--color-bg-body)';
+                    b.style.color = isActive ? '#fff' : 'var(--color-text-main)';
+                });
+                $$('.register-only').forEach(el => el.classList.toggle('hidden', mode !== 'register'));
+                $('#auth-title').textContent = mode === 'register' ? 'Buat Akun Kampusmu' : 'Selamat Datang Kembali';
+                $('#auth-subtitle').textContent = mode === 'register' ? 'Daftar dengan NPM Gunadarma.' : 'Masuk dengan NPM Gunadarma.';
+                $('#auth-submit').textContent = mode === 'register' ? 'Buat Akun' : 'Masuk';
+                $('#auth-error').classList.add('hidden');
+            });
+        });
+
+        $('#auth-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const form = e.currentTarget;
+            const payload = Object.fromEntries(new FormData(form));
+            const btn = $('#auth-submit');
+            const errBox = $('#auth-error');
+            
+            errBox.classList.add('hidden');
+            btn.disabled = true;
+            btn.textContent = 'Memproses...';
+
+            try {
+                const res = await fetch(`/api/${mode === 'register' ? 'register' : 'login'}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Gagal');
+                window.location.href = '/';
+            } catch (err) {
+                errBox.textContent = err.message;
+                errBox.classList.remove('hidden');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = mode === 'register' ? 'Buat Akun' : 'Masuk';
+            }
+        });
+    </script>
+</body>
+</html>

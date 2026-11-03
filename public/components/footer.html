@@ -43,41 +43,6 @@
 
 <!-- 12. MODAL: AUTHENTICATION -->
 <dialog id="auth-dialog" class="modal-dialog">
-  <div class="modal-content auth-modal-content">
-    <button class="modal-close" data-close="auth-dialog">×</button>
-    <div class="text-center mb-6">
-      <h2 id="auth-title" class="text-xl font-bold">Selamat Datang Kembali</h2>
-      <p id="auth-subtitle" class="text-sm text-gray">Masuk dengan NPM Gunadarma.</p>
-    </div>
-    <div class="auth-tabs">
-      <button class="auth-tab active" data-auth-mode="login">Masuk</button>
-      <button class="auth-tab" data-auth-mode="register">Daftar</button>
-    </div>
-    <form id="auth-form" class="mt-4">
-      <div class="form-group">
-        <label>NPM (8 Digit)</label>
-        <input name="npm" class="form-input" inputmode="numeric" required maxlength="8" placeholder="Contoh: 50422001">
-      </div>
-      <div class="register-only hidden form-group">
-        <label>Nama Lengkap</label>
-        <input name="fullName" class="form-input" maxlength="100" placeholder="Sesuai KTM">
-      </div>
-      <div class="register-only hidden form-group">
-        <label>Username Publik</label>
-        <input name="username" class="form-input" maxlength="30" placeholder="Opsional">
-      </div>
-      <div class="register-only hidden form-group">
-        <label>Nomor WhatsApp</label>
-        <input name="phone" class="form-input" inputmode="tel" placeholder="08xxxxxxxxxx">
-      </div>
-      <div class="form-group">
-        <label>Kata Sandi</label>
-        <input name="password" class="form-input" type="password" minlength="8" required placeholder="Minimal 8 karakter">
-      </div>
-      <div class="error-msg hidden" id="auth-error"></div>
-      <button class="btn btn-primary w-full mt-4" id="auth-submit" type="submit">Masuk</button>
-    </form>
-  </div>
 </dialog>
 
 <!-- 13. MODAL: PASANG IKLAN -->

@@ -36,8 +36,7 @@ function setError(element, message) {
 }
 
 function displayAuth(mode = "login") {
-  setAuthMode(mode);
-  $("#auth-dialog").showModal();
+  window.location.href = `login.html?mode=${mode}`;
 }
 
 function setAuthMode(mode) {
@@ -245,10 +244,12 @@ async function refreshUser() {
 }
 
 function switchView(name) {
+  // Jika user belum login dan mencoba akses halaman privat, lempar ke login page
   if (["my-listings", "chats", "profile"].includes(name) && !state.user) {
-    displayAuth();
+    window.location.href = "login.html";
     return;
   }
+  // ... (sisanya biarkan sama)
   $$(".view-section").forEach((panel) => panel.classList.toggle("hidden", panel.id !== `${name}-view`));
   $$(".nav-tab").forEach((tab) => tab.classList.toggle("active", tab.dataset.view === name));
   
@@ -478,8 +479,7 @@ function renderEditImages(images) {
 
 async function startConversation(listingId) {
   if (!state.user) {
-    $("#detail-dialog").close();
-    displayAuth();
+    window.location.href = "login.html";
     return;
   }
   try {
