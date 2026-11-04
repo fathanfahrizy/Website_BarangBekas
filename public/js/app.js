@@ -70,16 +70,16 @@ function cardMarkup(item, own = false) {
 
   const sellerActions = own ? `
     <div style="display:flex; gap:6px; margin-top:10px; width:100%;">
-      <button type="button" class="btn-outline" style="flex:1; padding:5px 8px; border-radius:var(--radius-sm); font-size:11px; font-weight:700;" data-edit-id="${escapeHtml(item.id)}">✏️ Edit</button>
+      <button type="button" class="btn-outline" style="flex:1; padding:5px 8px; font-size:11px; font-weight:700;" data-edit-id="${escapeHtml(item.id)}">✏️ Edit</button>
       ${!sold 
-        ? `<button type="button" class="btn-outline" style="padding:5px 8px; border-radius:var(--radius-sm); font-size:11px; font-weight:700;" data-status-id="${escapeHtml(item.id)}" title="Tandai terjual">Terjual</button>` 
-        : `<button type="button" class="btn-outline" style="padding:5px 8px; border-radius:var(--radius-sm); font-size:11px; font-weight:700;" data-reactivate-id="${escapeHtml(item.id)}" title="Aktifkan kembali">Aktifkan</button>`
+        ? `<button type="button" class="btn-outline" style="padding:5px 8px; font-size:11px; font-weight:700;" data-status-id="${escapeHtml(item.id)}" title="Tandai terjual">Terjual</button>` 
+        : `<button type="button" class="btn-outline" style="padding:5px 8px; font-size:11px; font-weight:700;" data-reactivate-id="${escapeHtml(item.id)}" title="Aktifkan kembali">Aktifkan</button>`
       }
-      <button type="button" class="btn-outline" style="padding:5px 8px; border-radius:var(--radius-sm); font-size:11px; font-weight:700; color:#ef4444; border-color:#ef4444;" data-delete-item-id="${escapeHtml(item.id)}" title="Hapus barang dari etalase">🗑️</button>
+      <button type="button" class="btn-outline" style="padding:5px 8px; font-size:11px; font-weight:700; color:#ef4444; border-color:#ef4444;" data-delete-item-id="${escapeHtml(item.id)}" title="Hapus barang dari etalase">🗑️</button>
     </div>
   ` : '';
 
-  return `<article class="listing-card" style="background:#fff; border:1px solid var(--color-border); border-radius:var(--radius-md); overflow:hidden; cursor:pointer; display:flex; flex-direction:column; transition:transform 0.2s, box-shadow 0.2s;" data-listing-id="${escapeHtml(item.id)}" tabindex="0">
+  return `<article class="listing-card" style="background:#fff; border:1px solid var(--color-border); border-radius:var(--radius-md); overflow:hidden; cursor:pointer; display:flex; flex-direction:column;" data-listing-id="${escapeHtml(item.id)}" tabindex="0">
     <div style="position:relative; height:180px; background:var(--color-bg-body); overflow:hidden; display:grid; place-items:center;">
       ${image}
       ${sold ? '<span style="position:absolute; top:8px; left:8px; background:rgba(239, 68, 68, 0.9); color:#fff; font-size:10px; font-weight:bold; padding:4px 8px; border-radius:4px;">TERJUAL</span>' : `${conditionBadge}${locationBadge}`}
@@ -112,12 +112,6 @@ function renderListings(items, own = false) {
     card.addEventListener("click", (event) => {
       if (event.target.closest("[data-status-id], [data-reactivate-id], [data-edit-id], [data-delete-item-id]")) return;
       showListing(card.dataset.listingId);
-    });
-    card.addEventListener("keydown", (event) => {
-      if (event.key === "Enter" || event.key === " ") {
-        event.preventDefault();
-        showListing(card.dataset.listingId);
-      }
     });
   });
   grid.querySelectorAll("[data-status-id]").forEach((button) => {
@@ -163,8 +157,15 @@ async function loadListings(own = false) {
   try {
     const data = await api(`/api/listings?${params}`);
     renderListings(data.listings, own);
+
+    if (own) {
+        const etalaseDot = $("#etalase-dot");
+        if (etalaseDot) {
+            etalaseDot.classList.toggle("hidden", data.listings.length === 0);
+        }
+    }
   } catch (error) {
-    showError(error);
+    toast(error.message || "Gagal memuat data.");
   }
 }
 
@@ -175,6 +176,14 @@ async function loadCategories() {
     if ($("#listing-form")) $("#listing-form").elements.categoryId.insertAdjacentHTML("beforeend", `<option value="${category.id}">${escapeHtml(category.name)}</option>`);
     if ($("#edit-category")) $("#edit-category").insertAdjacentHTML("beforeend", `<option value="${category.id}">${escapeHtml(category.name)}</option>`);
   });
+  
+  // Sinkronisasi opsi kategori ke header
+  const bottomCat = $("#category-filter");
+  const headerCat = $("#header-category-filter");
+  if (bottomCat && headerCat) {
+    headerCat.innerHTML = bottomCat.innerHTML;
+  }
+  syncBottomToHeader();
 }
 
 function updateUserUI() {
@@ -247,24 +256,17 @@ function switchView(name) {
   const heroBanner = $("#welcome-banner");
   if (heroBanner) heroBanner.classList.toggle("hidden", name !== "market");
   
-  if (name === "my-listings") loadListings(true).catch(showError);
-  if (name === "market") loadListings().catch(showError);
-  if (name === "chats") refreshConversations().catch(showError);
+  if (name === "my-listings") loadListings(true).catch((e) => toast(e.message));
+  if (name === "market") loadListings().catch((e) => toast(e.message));
+  if (name === "chats") refreshConversations().catch((e) => toast(e.message));
 }
 
-function showError(error) {
-  toast(error.message || "Terjadi kesalahan. Silakan coba lagi.");
-}
-
-// --- FUNGSI SEARCH YANG DIPERBAIKI ---
 function triggerSearch() {
-  // Paksa pindah ke market view agar hasil search terlihat
   $$(".view-section").forEach((panel) => panel.classList.toggle("hidden", panel.id !== "market-view"));
   $$(".nav-tab").forEach((tab) => tab.classList.toggle("active", tab.dataset.view === "market"));
   const heroBanner = $("#welcome-banner");
-  if (heroBanner) heroBanner.classList.add("hidden"); // Sembunyikan banner saat search
-  
-  loadListings().catch(showError);
+  if (heroBanner) heroBanner.classList.add("hidden");
+  loadListings().catch((e) => toast(e.message));
 }
 
 async function showListing(id) {
@@ -358,7 +360,7 @@ async function deleteListing(id) {
     toast("Barang berhasil dihapus dari etalase.");
     await loadListings(true);
     await loadListings();
-  } catch (error) { showError(error); }
+  } catch (error) { toast(error.message); }
 }
 
 async function openEditListing(id) {
@@ -380,7 +382,7 @@ async function openEditListing(id) {
     $("#edit-thumbnail-id").value = "";
     renderEditImages(listing.image_objects || []);
     $("#edit-listing-dialog").showModal();
-  } catch (error) { showError(error); }
+  } catch (error) { toast(error.message); }
 }
 
 function renderEditImages(images) {
@@ -439,24 +441,35 @@ function renderEditImages(images) {
 }
 
 async function startConversation(listingId) {
-  if (!state.user) { window.location.href = "login.html"; return; }
+  if (!state.user) {
+    window.location.href = "login.html";
+    return;
+  }
   try {
-    const { conversationId } = await api("/api/conversations", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ listingId }) });
+    const { conversationId } = await api("/api/conversations", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ listingId }),
+    });
     $("#detail-dialog")?.close();
     state.chatRole = "buying";
     await refreshConversations();
     switchView("chats");
     await openConversation(conversationId);
-  } catch (error) { showError(error); }
+  } catch (error) { toast(error.message); }
 }
 
 async function changeListingStatus(id, status) {
   try {
-    await api(`/api/listings/${encodeURIComponent(id)}/status`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status }) });
+    await api(`/api/listings/${encodeURIComponent(id)}/status`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status }),
+    });
     toast(status === "sold" ? "Barang ditandai terjual." : "Barang aktif kembali.");
     await loadListings(true);
     await loadListings();
-  } catch (error) { showError(error); }
+  } catch (error) { toast(error.message); }
 }
 
 async function deleteConversation(id) {
@@ -470,7 +483,7 @@ async function deleteConversation(id) {
       if (windowElement) windowElement.innerHTML = `<div class="chat-empty"><span>💬</span><h3>Pilih Percakapan</h3><p>Diskusikan detail barang dan tentukan lokasi meetup.</p></div>`;
     }
     await refreshConversations();
-  } catch (error) { showError(error); }
+  } catch (error) { toast(error.message); }
 }
 
 async function refreshConversations() {
@@ -515,10 +528,11 @@ async function refreshConversations() {
     list.querySelectorAll("[data-conversation-id]").forEach((button) => { button.addEventListener("click", () => openConversation(button.dataset.conversationId)); });
     list.querySelectorAll(".btn-del-conv").forEach((btn) => { btn.addEventListener("click", (e) => { e.stopPropagation(); deleteConversation(btn.dataset.deleteId); }); });
   }
-  const chatCount = $("#chat-count");
-  if (chatCount) { chatCount.textContent = conversations.length; chatCount.classList.toggle("hidden", !conversations.length); }
   const messageDot = $("#message-dot");
-  if (messageDot) { messageDot.classList.toggle("hidden", !conversations.length); }
+  if (messageDot) {
+      const hasActivity = conversations.length > 0;
+      messageDot.classList.toggle("hidden", !hasActivity);
+  }
   if (state.activeConversation && $("#chats-view") && $("#chats-view").classList.contains("hidden") === false) {
     const exists = conversations.some((item) => String(item.id) === String(state.activeConversation));
     if (!exists) state.activeConversation = null;
@@ -581,22 +595,60 @@ async function sendMessage(event) {
   if (!body || !state.activeConversation) return;
   input.disabled = true;
   try {
-    await api(`/api/conversations/${encodeURIComponent(state.activeConversation)}/messages`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ body }) });
+    await api(`/api/conversations/${encodeURIComponent(state.activeConversation)}/messages`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ body }),
+    });
     input.value = "";
     await Promise.all([loadMessages(state.activeConversation), refreshConversations()]);
-  } catch (error) { showError(error); } finally { input.disabled = false; input.focus(); }
+  } catch (error) { toast(error.message); } finally { input.disabled = false; input.focus(); }
 }
 
 // ==========================================
-// EVENT LISTENERS & INITIALIZATION
+// SINKRONISASI FILTER HEADER & BAWAH
 // ==========================================
 
+function syncHeaderToBottom() {
+  if ($("#category-filter")) $("#category-filter").value = $("#header-category-filter")?.value || "";
+  if ($("#filter-min-price")) $("#filter-min-price").value = $("#header-min-price")?.value || "";
+  if ($("#filter-max-price")) $("#filter-max-price").value = $("#header-max-price")?.value || "";
+  if ($("#filter-condition")) $("#filter-condition").value = $("#header-condition")?.value || "";
+  if ($("#filter-location")) $("#filter-location").value = $("#header-location")?.value || "";
+  if ($("#filter-sort")) $("#filter-sort").value = $("#header-sort")?.value || "newest";
+
+  const label = $("#header-filter-label");
+  if (label) {
+    const catName = $("#header-category-filter")?.value ? $("#category-filter option[value='" + $("#header-category-filter").value + "']")?.textContent : "Semua";
+    label.textContent = (catName || "Semua") + " ▼";
+  }
+}
+
+function syncBottomToHeader() {
+  if ($("#header-category-filter")) $("#header-category-filter").value = $("#category-filter")?.value || "";
+  if ($("#header-min-price")) $("#header-min-price").value = $("#filter-min-price")?.value || "";
+  if ($("#header-max-price")) $("#header-max-price").value = $("#filter-max-price")?.value || "";
+  if ($("#header-condition")) $("#header-condition").value = $("#filter-condition")?.value || "";
+  if ($("#header-location")) $("#header-location").value = $("#filter-location")?.value || "";
+  if ($("#header-sort")) $("#header-sort").value = $("#filter-sort")?.value || "newest";
+
+  const label = $("#header-filter-label");
+  if (label) {
+    const catName = $("#category-filter")?.value ? $("#category-filter option[value='" + $("#category-filter").value + "']")?.textContent : "Semua";
+    label.textContent = (catName || "Semua") + " ▼";
+  }
+}
+
+// ==========================================
+// SEMUA EVENT LISTENERS DI SATU TEMPAT
+// ==========================================
+
+// Nav tabs
 $$(".nav-tab").forEach((tab) => tab.addEventListener("click", () => switchView(tab.dataset.view)));
 
-// --- SEARCH LOGIC (FIXED) ---
+// Search bar
 const searchInput = $("#search-input");
 const searchBtn = $("#search-button");
-
 if (searchInput) {
   searchInput.addEventListener("keydown", (event) => {
     if (event.key === "Enter") { event.preventDefault(); triggerSearch(); }
@@ -617,32 +669,45 @@ $$(".keyword-tag").forEach((tag) => {
   });
 });
 
-// Category Sidebar Menu
+// Category sidebar
 $$(".sidebar-item").forEach((item) => {
   item.addEventListener("click", () => {
     const catId = item.dataset.category;
     if ($("#category-filter")) $("#category-filter").value = catId;
-    triggerSearch(); // Use triggerSearch to ensure we are on market view
+    triggerSearch();
     const market = $("#market-view");
     if (market) market.scrollIntoView({ behavior: "smooth" });
   });
 });
 
-// Chat Role Tabs
+// Chat role tabs
 $$(".chat-role-tab").forEach((btn) => { btn.addEventListener("click", () => { state.chatRole = btn.dataset.chatRole; refreshConversations(); }); });
 
 // Sell buttons
-["#sell-button", "#welcome-sell", "#empty-sell", "#my-sell", "#hero-action-sell", "#dock-sell", "#footer-sell-link"].forEach((selector) => {
+[
+  "#sell-button", "#welcome-sell", "#empty-sell", "#my-sell", 
+  "#hero-action-sell", "#dock-sell", "#footer-sell-link", "#btn-tambah-etalase"
+].forEach((selector) => {
   const el = $(selector);
-  if (el) { el.addEventListener("click", () => { if (!state.user) displayAuth("register"); else $("#listing-dialog").showModal(); }); }
+  if (el) {
+    el.addEventListener("click", () => {
+      if (!state.user) {
+        window.location.href = "login.html?mode=register";
+      } else {
+        const modal = $("#listing-dialog");
+        if (modal) modal.showModal();
+      }
+    });
+  }
 });
 
-// Hero action login / profile
+// Hero action
 const heroLogin = $("#hero-action-login");
 if (heroLogin) { heroLogin.addEventListener("click", () => { if (state.user) switchView("profile"); else displayAuth("login"); }); }
 
-// Floating dock buttons
-const dockChats = $("#dock-chats"); if (dockChats) dockChats.addEventListener("click", () => switchView("chats"));
+// Dock buttons
+const dockChats = $("#dock-chats");
+if (dockChats) dockChats.addEventListener("click", () => window.location.href = "chat.php");
 const dockMy = $("#dock-my"); if (dockMy) dockMy.addEventListener("click", () => switchView("my-listings"));
 const dockTop = $("#dock-top"); if (dockTop) dockTop.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
 
@@ -663,7 +728,8 @@ if (footerLogin) { footerLogin.addEventListener("click", (e) => { e.preventDefau
 
 if ($("#login-button")) $("#login-button").addEventListener("click", () => displayAuth());
 if ($("#account-button")) $("#account-button").addEventListener("click", () => switchView("profile"));
-if ($("#messages-nav")) $("#messages-nav").addEventListener("click", () => switchView("chats"));
+if ($("#messages-nav")) $("#messages-nav").addEventListener("click", () => window.location.href = "chat.php");
+if ($("#etalase-nav")) $("#etalase-nav").addEventListener("click", () => window.location.href = "etalase.php");
 
 const logoutBtn = $("#logout-button");
 if (logoutBtn) {
@@ -673,14 +739,15 @@ if (logoutBtn) {
       state.user = null; state.activeConversation = null;
       updateUserUI(); switchView("market");
       toast("Kamu sudah keluar.");
-    } catch (error) { showError(error); }
+    } catch (error) { toast(error.message); }
   });
 }
 
+// Modal close
 $$("[data-close]").forEach((button) => button.addEventListener("click", () => { const dialog = $(`#${button.dataset.close}`); if (dialog) dialog.close(); }));
 $$("dialog").forEach((dialog) => dialog.addEventListener("click", (event) => { if (event.target === dialog) dialog.close(); }));
 
-// Auth Form
+// Auth form
 const authForm = $("#auth-form");
 if (authForm) {
   authForm.addEventListener("submit", async (event) => {
@@ -692,7 +759,11 @@ if (authForm) {
     const submitBtn = $("#auth-submit");
     if (submitBtn) submitBtn.disabled = true;
     try {
-      const { user } = await api(`/api/${mode === "register" ? "register" : "login"}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+      const { user } = await api(`/api/${mode === "register" ? "register" : "login"}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
       state.user = user; state.activeConversation = null; state.chatRole = "buying";
       updateUserUI();
       if ($("#auth-dialog")) $("#auth-dialog").close();
@@ -704,7 +775,7 @@ if (authForm) {
   });
 }
 
-// Listing Form
+// Listing form
 const listingForm = $("#listing-form");
 if (listingForm) {
   listingForm.addEventListener("submit", async (event) => {
@@ -716,14 +787,19 @@ if (listingForm) {
     try {
       await api("/api/listings", { method: "POST", body: new FormData(form) });
       form.reset();
-      if ($("#listing-dialog")) $("#listing-dialog").close();
-      await loadListings();
+      const modal = $("#listing-dialog");
+      if (modal) modal.close();
+      await Promise.all([loadListings(), loadListings(true)]);
       toast("Barang berhasil dipasang di marketplace!");
-    } catch (error) { setError($("#listing-error"), error.message); } finally { if (submit) submit.disabled = false; }
+    } catch (error) {
+      setError($("#listing-error"), error.message);
+    } finally {
+      if (submit) submit.disabled = false;
+    }
   });
 }
 
-// Edit Listing Form
+// Edit listing form
 const editListingForm = $("#edit-listing-form");
 if (editListingForm) {
   editListingForm.addEventListener("submit", async (event) => {
@@ -744,7 +820,7 @@ if (editListingForm) {
   });
 }
 
-// Profile Form
+// Profile form
 const profileForm = $("#profile-form");
 if (profileForm) {
   profileForm.addEventListener("submit", async (event) => {
@@ -753,7 +829,7 @@ if (profileForm) {
       const { user } = await api("/api/profile", { method: "PUT", body: new FormData(event.currentTarget) });
       state.user = user; updateUserUI();
       toast("Profil berhasil disimpan.");
-    } catch (error) { showError(error); }
+    } catch (error) { toast(error.message); }
   });
 }
 
@@ -768,19 +844,30 @@ if (profileAvatar) {
   });
 }
 
-// Filter Dropdown Logic
+// --- FILTER DROPDOWN BAWAH ---
 const filterToggleBtn = $("#filter-toggle-btn");
 const filterDropdown = $("#filter-dropdown");
 const applyFiltersBtn = $("#apply-filters-btn");
 const resetFiltersBtn = $("#reset-filters-btn");
 
 if (filterToggleBtn && filterDropdown) {
-  filterToggleBtn.addEventListener("click", (event) => { event.stopPropagation(); filterDropdown.classList.toggle("hidden"); });
+  filterToggleBtn.addEventListener("click", (event) => { 
+    event.stopPropagation(); 
+    filterDropdown.classList.toggle("hidden"); 
+  });
   document.addEventListener("click", (event) => {
-    if (!filterDropdown.contains(event.target) && event.target !== filterToggleBtn) filterDropdown.classList.add("hidden");
+    if (!filterDropdown.contains(event.target) && event.target !== filterToggleBtn) {
+      filterDropdown.classList.add("hidden");
+    }
   });
 }
-if (applyFiltersBtn) { applyFiltersBtn.addEventListener("click", () => { loadListings().catch(showError); filterDropdown?.classList.add("hidden"); }); }
+if (applyFiltersBtn) { 
+  applyFiltersBtn.addEventListener("click", () => { 
+    syncBottomToHeader(); 
+    loadListings().catch((e) => toast(e.message)); 
+    filterDropdown?.classList.add("hidden"); 
+  }); 
+}
 if (resetFiltersBtn) {
   resetFiltersBtn.addEventListener("click", () => {
     if ($("#category-filter")) $("#category-filter").value = "";
@@ -789,11 +876,56 @@ if (resetFiltersBtn) {
     if ($("#filter-condition")) $("#filter-condition").value = "";
     if ($("#filter-location")) $("#filter-location").value = "";
     if ($("#filter-sort")) $("#filter-sort").value = "newest";
-    loadListings().catch(showError);
+    syncBottomToHeader(); 
+    loadListings().catch((e) => toast(e.message));
     filterDropdown?.classList.add("hidden");
   });
 }
 
+// --- FILTER DROPDOWN HEADER ---
+const headerFilterBtn = $("#header-filter-btn");
+const headerFilterDropdown = $("#header-filter-dropdown");
+
+if (headerFilterBtn && headerFilterDropdown) {
+  headerFilterBtn.addEventListener("click", (event) => {
+    event.stopPropagation();
+    headerFilterDropdown.classList.toggle("hidden");
+    if (filterDropdown) filterDropdown.classList.add("hidden");
+  });
+  document.addEventListener("click", (event) => {
+    if (!headerFilterDropdown.contains(event.target) && event.target !== headerFilterBtn) {
+      headerFilterDropdown.classList.add("hidden");
+    }
+  });
+}
+
+const headerApplyBtn = $("#header-apply-filters");
+if (headerApplyBtn) {
+  headerApplyBtn.addEventListener("click", () => {
+    syncHeaderToBottom();
+    headerFilterDropdown?.classList.add("hidden");
+    triggerSearch();
+  });
+}
+
+const headerResetBtn = $("#header-reset-filters");
+if (headerResetBtn) {
+  headerResetBtn.addEventListener("click", () => {
+    if ($("#header-category-filter")) $("#header-category-filter").value = "";
+    if ($("#header-min-price")) $("#header-min-price").value = "";
+    if ($("#header-max-price")) $("#header-max-price").value = "";
+    if ($("#header-condition")) $("#header-condition").value = "";
+    if ($("#header-location")) $("#header-location").value = "";
+    if ($("#header-sort")) $("#header-sort").value = "newest";
+    syncHeaderToBottom();
+    headerFilterDropdown?.classList.add("hidden");
+    triggerSearch();
+  });
+}
+
+// ==========================================
+// INITIALIZE
+// ==========================================
 async function initialize() {
   try {
     await loadCategories();
@@ -801,8 +933,10 @@ async function initialize() {
     await loadListings();
     state.pollTimer = setInterval(() => {
       if (!state.user) return;
-      refreshConversations().catch(showError);
-      if (state.activeConversation && $("#chats-view") && !$("#chats-view").classList.contains("hidden")) loadMessages(state.activeConversation).catch(showError);
+      refreshConversations().catch((e) => toast(e.message));
+      if (state.activeConversation && $("#chats-view") && !$("#chats-view").classList.contains("hidden")) {
+        loadMessages(state.activeConversation).catch((e) => toast(e.message));
+      }
     }, 4000);
   } catch (error) { toast(error.message); }
 }

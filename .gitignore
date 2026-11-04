@@ -1,4 +1,17 @@
-node_modules/
+# 🔒 JANGAN UPLOAD FILE INI (Berisi Password Database)
 .env
-uploads/
-npm-debug.log*
+
+# 📁 Folder Uploads (Isinya foto barang, bakal bikin repo jadi ratusan MB kalau di-push)
+/uploads/
+
+# 📦 Node Modules (Kalau suatu saat kamu install dependencies Node.js)
+node_modules/
+
+# 🖥️ File Sampah dari OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 💻 File Settingan Editor (VS Code / JetBrains)
+.vscode/
+.idea/

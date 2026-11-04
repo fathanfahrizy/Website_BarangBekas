@@ -55,4 +55,4 @@ if ($uri !== '/' && file_exists($publicFile) && is_file($publicFile)) {
 }
 
 // 4. Default: Tampilkan halaman frontend utama
-require __DIR__ . '/public/index.html';
+require __DIR__ . '/public/index.php';

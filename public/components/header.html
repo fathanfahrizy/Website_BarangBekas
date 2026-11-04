@@ -28,9 +28,6 @@
 
     <div class="search-wrapper">
       <div class="search-box">
-        <div class="search-dropdown">
-          <span class="search-category-pill">Semua ▼</span>
-        </div>
         <input id="search-input" class="search-input" type="search" placeholder="Cari buku, jas lab, kalkulator, kipas kos..." aria-label="Cari barang">
         <button class="search-btn" id="search-button" aria-label="Cari">
           <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
@@ -49,37 +46,91 @@
     </div>
 
     <div class="user-actions">
-  <!-- Ikon Pesan / Chat (Menggantikan tombol "Pesan" teks) -->
-  <button class="action-icon signed-in-only hidden" id="messages-nav" title="Pesan" style="position: relative; padding: 8px;">
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-    </svg>
-    <!-- Badge notifikasi merah ala JD.com -->
-    <i id="message-dot" class="badge-dot hidden" style="position: absolute; top: 4px; right: 4px; width: 10px; height: 10px; background: #ef4444; border: 2px solid var(--bg-raw); border-radius: 50%;"></i>
-  </button>
-
-  <!-- Ikon Profil (Menggantikan avatar huruf jelek) -->
-  <button class="action-icon signed-in-only hidden" id="account-button" title="Profil">
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-      <circle cx="12" cy="7" r="4"></circle>
-    </svg>
-  </button>
-
-  <button class="btn" id="login-button">LOGIN</button>
-  <button class="btn btn-sell" id="sell-button">JUAL BARANG</button>
-</div>
+      <button class="action-icon signed-in-only hidden" id="messages-nav" title="Pesan" style="position: relative; padding: 8px;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        </svg>
+        <span id="message-dot" class="hidden" style="position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; background-color: #ef4444; border-radius: 50%; border: 2px solid #fff;"></span>
+      </button>
+      <button class="action-icon signed-in-only hidden" id="etalase-nav" title="Etalase Saya" style="position: relative; padding: 8px;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg>
+        <span id="etalase-dot" class="hidden" style="position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; background-color: #f59e0b; border-radius: 50%; border: 2px solid #fff;"></span>
+      </button>
+      <button class="action-icon signed-in-only hidden" id="account-button" title="Profil">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+      </button>
+      <button class="btn" id="login-button">LOGIN</button>
+      <button class="btn btn-sell" id="sell-button">JUAL BARANG</button>
+    </div>
+  </div>
 </header>
+
+<!-- DROPDOWN FILTER HEADER (muncul di bawah tombol filter header) -->
+<div id="header-filter-dropdown" class="hidden" style="position: absolute; top: 100%; left: 50%; transform: translateX(-50%); margin-top: 8px; background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 20px; min-width: 320px; z-index: 100; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+  <div style="display: grid; gap: 12px;">
+    <div class="form-group" style="margin:0;">
+      <label style="font-size: 11px; font-weight: 600; text-transform: uppercase; margin-bottom: 4px; display: block;">Kategori</label>
+      <select id="header-category-filter" class="form-input" style="height: 36px; width: 100%;">
+        <option value="">Semua Kategori</option>
+      </select>
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+      <div class="form-group" style="margin:0;">
+        <label style="font-size: 11px; font-weight: 600; text-transform: uppercase; margin-bottom: 4px; display: block;">Harga Min</label>
+        <input type="number" id="header-min-price" class="form-input" placeholder="0" style="height: 36px;">
+      </div>
+      <div class="form-group" style="margin:0;">
+        <label style="font-size: 11px; font-weight: 600; text-transform: uppercase; margin-bottom: 4px; display: block;">Harga Max</label>
+        <input type="number" id="header-max-price" class="form-input" placeholder="Max" style="height: 36px;">
+      </div>
+    </div>
+    <div class="form-group" style="margin:0;">
+      <label style="font-size: 11px; font-weight: 600; text-transform: uppercase; margin-bottom: 4px; display: block;">Kondisi</label>
+      <select id="header-condition" class="form-input" style="height: 36px; width: 100%;">
+        <option value="">Semua Kondisi</option>
+        <option value="like_new">Seperti Baru</option>
+        <option value="good">Bagus</option>
+        <option value="fair">Layak</option>
+        <option value="needs_repair">Perlu Perbaikan</option>
+      </select>
+    </div>
+    <div class="form-group" style="margin:0;">
+      <label style="font-size: 11px; font-weight: 600; text-transform: uppercase; margin-bottom: 4px; display: block;">Lokasi COD</label>
+      <select id="header-location" class="form-input" style="height: 36px; width: 100%;">
+        <option value="">Semua Kampus</option>
+        <option value="Kampus D">Kampus D (Margonda)</option>
+        <option value="Kampus E">Kampus E (Kelapa Dua)</option>
+        <option value="Kampus G">Kampus G (Lab)</option>
+        <option value="Kampus H">Kampus H (Simatupang)</option>
+        <option value="Kampus J">Kampus J (Kalimalang)</option>
+      </select>
+    </div>
+    <div class="form-group" style="margin:0;">
+      <label style="font-size: 11px; font-weight: 600; text-transform: uppercase; margin-bottom: 4px; display: block;">Urutkan</label>
+      <select id="header-sort" class="form-input" style="height: 36px; width: 100%;">
+        <option value="newest">Terbaru</option>
+        <option value="price_asc">Harga Terendah</option>
+        <option value="price_desc">Harga Tertinggi</option>
+      </select>
+    </div>
+    <div style="display: flex; gap: 8px; margin-top: 8px;">
+      <button id="header-apply-filters" class="btn btn-primary" style="flex: 1; height: 36px; font-weight: 600;">Terapkan</button>
+      <button id="header-reset-filters" class="btn btn-outline" style="height: 36px; font-weight: 600;">Reset</button>
+    </div>
+  </div>
+</div>
 
 <!-- 3. SUB NAVIGATION TABS -->
 <nav class="sub-nav">
   <div class="container sub-nav-inner">
     <div class="nav-tabs">
       <button class="nav-tab active" data-view="market">Jelajahi Pasar</button>
-      <button class="nav-tab signed-in-only hidden" data-view="my-listings">Etalase Saya</button>
-      <button class="nav-tab signed-in-only hidden" data-view="chats">
-        Obrolan <span id="chat-count" class="counter hidden">0</span>
-      </button>
       <button class="nav-tab signed-in-only hidden" data-view="profile">Profil Mahasiswa</button>
     </div>
     <div class="nav-community">
