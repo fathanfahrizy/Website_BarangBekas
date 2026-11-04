@@ -1,17 +1,24 @@
 <?php
-// ============================================================
-// Chat Page - PasarKampus Gunadarma
-// ============================================================
-
-// 1. Cek Session (Wajib Login)
+// 1. INI PALING ATAS (SERVER SIDE LOGIC)
 if (session_status() === PHP_SESSION_NONE) session_start();
 
-if (empty($_SESSION['userId'])) {
-    header('Location: login.html');
-    exit;
+$userId = $_SESSION['userId'] ?? null;
+$userName = $_SESSION['userName'] ?? 'User';
+$userInitial = strtoupper(substr($userName, 0, 1));
+
+$cartCount = 0;
+if ($userId) {
+    try {
+        $pdo = require __DIR__ . '/../../config/database.php';
+        $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM carts WHERE user_id = ?");
+        $stmt->execute([$userId]);
+        $result = $stmt->fetch();
+        $cartCount = $result ? (int)$result['count'] : 0;
+    } catch (Exception $e) {
+        $cartCount = 0;
+    }
 }
-
-
+$isLoggedIn = !empty($userId);
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -110,16 +117,7 @@ if (empty($_SESSION['userId'])) {
 </head>
 <body>
 
-    <!-- Include Header (SAMA dengan index.php) -->
-    <?php include __DIR__ . '/public/components/header.html'; ?>
-
-    <!-- Header Khusus Halaman Chat -->
-    <div class="chat-page-header">
-        <div class="container">
-            <h1>💬 Obrolan</h1>
-            <p>Negosiasi langsung dengan pembeli/penjual. Aman & tanpa nomor HP.</p>
-        </div>
-    </div>
+    <?php include 'public/components/navbar.php'; ?>
 
     <!-- Konten Utama Chat -->
     <main class="container" style="padding-bottom: 80px;">

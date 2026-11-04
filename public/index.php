@@ -18,7 +18,7 @@
 <body class="bg-gray-50">
 
   <!-- Memanggil Komponen 1: Header & Navbar -->
-  <?php include 'components/header.html'; ?>
+  <?php include 'components/navbar.php'; ?>
 
   <!-- Wadah Utama Konten -->
   <main class="container main-content">

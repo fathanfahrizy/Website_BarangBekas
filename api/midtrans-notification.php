@@ -1,7 +1,8 @@
 <?php
-// api/midtrans-notification.php
-require_once __DIR__ . '/helpers/midtrans.php';
+require_once __DIR__ . '/../helpers/midtrans.php';
 $pdo = require __DIR__ . '/../config/database.php';
+
+
 
 // Ambil raw data dari Midtrans
 $payload = file_get_contents('php://input');

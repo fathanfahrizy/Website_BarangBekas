@@ -108,7 +108,7 @@ if (empty($_SESSION['userId'])) {
 </style>
 </head>
 <body>
-<?php include 'public/components/header.html'; ?>
+<?php include 'components/navbar.php'; ?>
 
 <div class="cart-page-header">
   <div class="container">
@@ -417,6 +417,7 @@ if (btnOnline) {
     window.location.href = 'checkout.php?cart_ids=' + selectedIds;
   });
 }
+
 
 // Jalankan pas halaman load
 loadCartPage();

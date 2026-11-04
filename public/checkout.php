@@ -1,6 +1,6 @@
 <?php
 if (session_status() === PHP_SESSION_NONE) session_start();
-if (empty($_SESSION['userId'])) { header('Location: login.html'); exit; }
+if (empty($_SESSION['userId'])) { header('Location: ../login.html'); exit; }
 
 $cartIdsParam = $_GET['cart_ids'] ?? '';
 $listingParam = $_GET['listing'] ?? '';
@@ -10,8 +10,9 @@ $listingParam = $_GET['listing'] ?? '';
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Checkout - PasarKampus Gunadarma</title>
-<link rel="stylesheet" href="css/styles.css">
+<title>Checkout - Re-Campus</title>
+<!-- PERHATIKAN: Tambahan ../ di sini -->
+<link rel="stylesheet" href="../css/styles.css">
 <style>
   .checkout-wrap { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; margin-top: 32px; padding-bottom: 120px; }
   .checkout-section { background: #fff; border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 24px; margin-bottom: 16px; }
@@ -35,7 +36,8 @@ $listingParam = $_GET['listing'] ?? '';
 </style>
 </head>
 <body>
-<?php include 'public/components/header.html'; ?>
+<!-- PERHATIKAN: Path include disesuaikan -->
+<?php include 'components/navbar.php'; ?>
 
 <main class="container">
   <div style="margin-top: 24px; font-size: 20px; font-weight: 800;">🛍️ Checkout Pesanan</div>
@@ -151,11 +153,13 @@ $listingParam = $_GET['listing'] ?? '';
   </div>
 </div>
 
-<?php include 'public/components/footer.html'; ?>
-<script src="js/app.js"></script>
+<!-- PERHATIKAN: Path include disesuaikan -->
+<?php include 'components/footer.html'; ?>
+
+<!-- PERHATIKAN: Tambahan ../ di sini agar JS ke-load -->
+<script src="../js/app.js"></script>
 <script>
 // 1. DEFINISIKAN urlParams DULU BARU DI-GET!
-const urlParams = new URLSearchParams(window.location.search);
 const cartIdsParam = urlParams.get('cart_ids');
 const listingParam = urlParams.get('listing');
 
@@ -306,7 +310,7 @@ document.getElementById('btn-place-order').addEventListener('click', async () =>
     } else {
       toast(`🎉 SUKSES! Pesanan ${res.orderNumber} berhasil dibuat.`);
       setTimeout(() => {
-        window.location.href = 'index.php';
+        window.location.href = '../index.php';
       }, 1500);
     }
 

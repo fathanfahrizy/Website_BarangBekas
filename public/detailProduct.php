@@ -24,7 +24,7 @@ if (session_status() === PHP_SESSION_NONE) session_start();
 </style>
 </head>
 <body>
-<?php include 'public/components/header.html'; ?>
+<?php include 'components/navbar.php'; ?>
 
 <main class="container" style="padding-bottom:100px;">
   <div style="margin-top:24px; font-size:13px; color:var(--color-text-muted);">

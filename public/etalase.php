@@ -25,7 +25,7 @@ if (empty($_SESSION['userId'])) { header('Location: login.html'); exit; }
     </style>
 </head>
 <body>
-    <?php include __DIR__ . '/public/components/header.html'; ?>
+    <?php include 'components/navbar.php'; ?>>
 
     <div class="etalase-header">
         <div class="container">

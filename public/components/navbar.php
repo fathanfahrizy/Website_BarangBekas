@@ -1,3 +1,24 @@
+<?php
+// Ambil data user & cart count untuk navbar
+if (session_status() === PHP_SESSION_NONE) session_start();
+$userId = $_SESSION['userId'] ?? null;
+$userName = $_SESSION['userName'] ?? 'User';
+$userInitial = strtoupper(substr($userName, 0, 1));
+
+// Fetch cart count (kalau user login)
+$cartCount = 0;
+if ($userId) {
+    try {
+        $pdo = require __DIR__ . '/../../config/database.php';
+        $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM carts WHERE user_id = ?");
+        $stmt->execute([$userId]);
+        $cartCount = $stmt->fetch()['count'];
+    } catch (Exception $e) {
+        $cartCount = 0;
+    }
+}
+?>
+
 <!-- 1. TOP UTILITY BAR -->
 <div class="top-bar">
   <div class="container top-bar-inner">
@@ -66,16 +87,16 @@
     <circle cx="20" cy="21" r="1"></circle>
     <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
   </svg>
-  <span id="cart-count" class="counter hidden" style="position:absolute; top:2px; right:0; min-width:16px; font-size:10px;">0</span>
+  <span id="cart-count" class="counter <?= $cartCount > 0 ? '' : 'hidden' ?>" style="position:absolute; top:2px; right:0; min-width:16px; height:16px; font-size:10px; background:#ef4444; color:#fff; border-radius:50%; text-align:center; line-height:16px; font-weight:700;"><?= $cartCount ?></span>
 </button>
-      <button class="action-icon signed-in-only hidden" id="account-button" title="Profil">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-          <circle cx="12" cy="7" r="4"></circle>
-        </svg>
-      </button>
+      <button class="action-icon signed-in-only hidden" id="account-button" title="Profil" style="display: flex; align-items: center; gap: 8px;">
+  <!-- Avatar Bulat dengan Initial Nama -->
+  <div style="width: 32px; height: 32px; background: var(--color-primary, #4361ee); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; flex-shrink: 0;">
+    <?= $userInitial ?>
+  </div>
+</button>
       
-      <button class="btn" id="login-button">LOGIN</button>
+      <button class="btn signed-out-only" id="login-button">LOGIN</button>
       <button class="btn btn-sell" id="sell-button">JUAL BARANG</button>
     </div>
   </div>
@@ -135,16 +156,3 @@
     </div>
   </div>
 </div>
-
-<!-- 3. SUB NAVIGATION TABS -->
-<nav class="sub-nav">
-  <div class="container sub-nav-inner">
-    <div class="nav-tabs">
-      <button class="nav-tab active" data-view="market">Jelajahi Pasar</button>
-      <button class="nav-tab signed-in-only hidden" data-view="profile">Profil Mahasiswa</button>
-    </div>
-    <div class="nav-community">
-      <span class="live-indicator"></span> Komunitas UG
-    </div>
-  </div>
-</nav>

@@ -1,7 +1,8 @@
 <?php
 require_once __DIR__ . '/../helpers/response.php';
-require_once __DIR__ . '/../helpers/midtrans.php'; // Load Midtrans Config
+require_once __DIR__ . '/../helpers/midtrans.php';
 $pdo = require __DIR__ . '/../config/database.php';
+
 
 $userId = requireAuth();
 
@@ -95,9 +96,30 @@ try {
         }, $itemsToProcess),
     ];
 
-    // Panggil API Midtrans
-    $snapToken = \Midtrans\Snap::getSnapToken($params);
-    $paymentUrl = \Midtrans\Snap::getSnapUrl($params); // URL buat redirect user
+        // Panggil API Midtrans dengan error handling yang lebih detail
+    try {
+        error_log('Midtrans: Memanggil Snap API untuk order ' . $orderNumber);
+        error_log('Midtrans Params: ' . json_encode($params));
+        
+        $snapToken = \Midtrans\Snap::getSnapToken($params);
+        $paymentUrl = \Midtrans\Snap::getSnapUrl($params);
+        
+        error_log('Midtrans Success - Token: ' . $snapToken);
+        error_log('Midtrans Success - URL: ' . $paymentUrl);
+    } catch (Exception $midtransError) {
+        error_log('Midtrans Error: ' . $midtransError->getMessage());
+        error_log('Midtrans Error Code: ' . $midtransError->getCode());
+        
+        // Tetap return success tapi tanpa paymentUrl
+        jsonResponse([
+            'success' => true,
+            'orderNumber' => $orderNumber,
+            'totalAmount' => $totalAmount,
+            'paymentMethod' => $paymentMethod,
+            'midtransError' => $midtransError->getMessage()
+        ], 201);
+        exit;
+    }
 
     jsonResponse([
         'success' => true,
