@@ -151,141 +151,156 @@ if (empty($_SESSION['userId'])) {
 
     <!-- Load app.js (supaya semua tombol di header berfungsi) -->
     <script src="js/app.js"></script>
+<script>
+// Chat state
+const chatState = {
+  conversations: [],
+  activeConvId: null,
+  currentRole: 'buying'
+};
+
+// Override initialize() - skip loadListings() tapi tetap load user & conversations
+const originalInitialize = initialize;
+initialize = async function() {
+  try {
+    await loadCategories();
+    await refreshUser();
     
-    <!-- Script Khusus Chat -->
-    <script>
-        // Chat state
-        const chatState = {
-            conversations: [],
-            activeConvId: null,
-            currentRole: 'buying'
-        };
-        
-        // Override initialize() untuk skip loadListings() tapi tetap load user info
-        const originalInitialize = initialize;
-        initialize = async function() {
-            try {
-                await loadCategories(); // Load categories untuk modal
-                await refreshUser(); // Load user info untuk header
-                // Skip loadListings() karena kita di halaman chat
-                state.pollTimer = setInterval(() => {
-                    if (!state.user) return;
-                    refreshConversations().catch(showError);
-                }, 4000);
-                
-                // Load conversations untuk chat page
-                await loadChatConversations();
-            } catch (error) {
-                toast(error.message);
-            }
-        };
-        
-        // Panggil initialize() lagi dengan versi yang sudah di-override
-        initialize();
-        
-        // Chat-specific functions
-        async function loadChatConversations() {
-            try {
-                const { conversations } = await api('/api/conversations');
-                chatState.conversations = conversations;
-                renderChatConversations();
-            } catch (error) {
-                console.error('Failed to load conversations:', error);
-            }
-        }
-        
-        function renderChatConversations() {
-            const list = $('#conv-list');
-            const filtered = chatState.conversations.filter(c => c.role === chatState.currentRole);
-            
-            if (filtered.length === 0) {
-                list.innerHTML = `<div style="padding:40px; text-align:center; color:var(--color-text-muted);">Belum ada obrolan.</div>`;
-                return;
-            }
-            
-            list.innerHTML = filtered.map(c => `
-                <div class="conv-item ${chatState.activeConvId == c.id ? 'active' : ''}" data-id="${c.id}">
-                    <div class="conv-title">📦 ${escapeHtml(c.listing_title)}</div>
-                    <div class="conv-last-msg">${escapeHtml(c.last_message || 'Belum ada pesan')}</div>
-                </div>
-            `).join('');
-            
-            $$('.conv-item').forEach(el => el.addEventListener('click', () => openChat(el.dataset.id, filtered.find(c => c.id == el.dataset.id))));
-        }
-        
-        async function openChat(id, conv) {
-            chatState.activeConvId = id;
-            renderChatConversations();
-            
-            const win = $('#chat-window');
-            win.innerHTML = `
-                <div class="chat-active-header">
-                    <div>
-                        <strong style="font-size:15px;">${escapeHtml(conv.other_name)}</strong>
-                        <div style="font-size:12px; color:var(--color-text-muted);">Membahas: <b>${escapeHtml(conv.listing_title)}</b></div>
-                    </div>
-                    <div style="font-weight:800; color:var(--color-primary);">Rp${Number(conv.listing_price).toLocaleString('id-ID')}</div>
-                </div>
-                <div class="message-list" id="msg-list"></div>
-                <div class="chat-input-area">
-                    <input type="text" id="msg-input" placeholder="Ketik pesan..." maxlength="2000">
-                    <button class="btn btn-primary" id="send-btn" style="border-radius:var(--radius-full); padding:0 24px;">Kirim</button>
-                </div>
-            `;
-            
-            await loadChatMessages(id);
-            
-            $('#send-btn').addEventListener('click', sendChatMessage);
-            $('#msg-input').addEventListener('keydown', e => { if (e.key === 'Enter') sendChatMessage(); });
-        }
-        
-        async function loadChatMessages(id) {
-            try {
-                const { messages } = await api(`/api/conversations/${id}/messages`);
-                const list = $('#msg-list');
-                if (!list) return;
-                
-                list.innerHTML = messages.map(m => {
-                    const isMine = m.sender_id == state.user.id;
-                    const time = new Date(m.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-                    return `<div class="msg-bubble ${isMine ? 'sent' : 'received'}">${escapeHtml(m.body)}<span class="msg-time">${time}</span></div>`;
-                }).join('');
-                list.scrollTop = list.scrollHeight;
-            } catch (error) {
-                console.error('Failed to load messages:', error);
-            }
-        }
-        
-        async function sendChatMessage() {
-            const input = $('#msg-input');
-            const body = input.value.trim();
-            if (!body || !chatState.activeConvId) return;
-            
-            try {
-                await api(`/api/conversations/${chatState.activeConvId}/messages`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ body })
-                });
-                input.value = '';
-                await loadChatMessages(chatState.activeConvId);
-                await loadChatConversations();
-            } catch (error) {
-                alert('Gagal kirim pesan');
-            }
-        }
-        
-        // Role switcher
-        $$('.chat-role-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                $$('.chat-role-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                chatState.currentRole = btn.dataset.role;
-                chatState.activeConvId = null;
-                renderChatConversations();
-                $('#chat-window').innerHTML = `<div class="chat-empty"><span>💬</span><h3>Pilih Percakapan</h3><p>Klik salah satu obrolan di sebelah kiri untuk mulai chat.</p></div>`;
-            });
-        });
-    </script>
+    // Load conversations untuk chat page
+    await loadChatConversations();
+    
+    // Polling setiap 4 detik
+    state.pollTimer = setInterval(() => {
+      if (!state.user) return;
+      loadChatConversations().catch(e => console.error('Poll error:', e));
+    }, 4000);
+    
+    // Handle ?conv=ID dari URL
+    const urlConv = new URLSearchParams(window.location.search).get('conv');
+    if (urlConv) {
+      setTimeout(() => {
+        const target = chatState.conversations.find(c => String(c.id) === String(urlConv));
+        if (target) openChat(urlConv, target);
+      }, 500);
+    }
+  } catch (error) {
+    console.error('Init error:', error);
+    toast(error.message);
+  }
+};
+
+// Panggil initialize yang udah di-override
+initialize();
+
+// Chat-specific functions
+async function loadChatConversations() {
+  console.log('🔄 Loading conversations...');
+  try {
+    const { conversations } = await api('/api/conversations');
+    console.log('✅ Conversations loaded:', conversations);
+    chatState.conversations = conversations;
+    renderChatConversations();
+  } catch (error) {
+    console.error('❌ Failed to load conversations:', error);
+    $('#conv-list').innerHTML = `<div style="padding:20px; text-align:center; color:red;">Error: ${error.message}</div>`;
+  }
+}
+
+function renderChatConversations() {
+  const list = $('#conv-list');
+  const filtered = chatState.conversations.filter(c => c.role === chatState.currentRole);
+  
+  if (filtered.length === 0) {
+    list.innerHTML = `<div style="padding:40px; text-align:center; color:var(--color-text-muted);">Belum ada obrolan.</div>`;
+    return;
+  }
+  
+  list.innerHTML = filtered.map(c => `
+    <div class="conv-item ${chatState.activeConvId == c.id ? 'active' : ''}" data-id="${c.id}">
+      <div class="conv-title">📦 ${escapeHtml(c.listing_title)}</div>
+      <div class="conv-last-msg">${escapeHtml(c.last_message || 'Belum ada pesan')}</div>
+    </div>
+  `).join('');
+  
+  $$('.conv-item').forEach(el => el.addEventListener('click', () => {
+    const conv = filtered.find(c => c.id == el.dataset.id);
+    openChat(el.dataset.id, conv);
+  }));
+}
+
+async function openChat(id, conv) {
+  chatState.activeConvId = id;
+  renderChatConversations();
+  
+  const win = $('#chat-window');
+  win.innerHTML = `
+    <div class="chat-active-header">
+      <div>
+        <strong style="font-size:15px;">${escapeHtml(conv.other_name)}</strong>
+        <div style="font-size:12px; color:var(--color-text-muted);">Membahas: <b>${escapeHtml(conv.listing_title)}</b></div>
+      </div>
+      <div style="font-weight:800; color:var(--color-primary);">Rp${Number(conv.listing_price).toLocaleString('id-ID')}</div>
+    </div>
+    <div class="message-list" id="msg-list"></div>
+    <div class="chat-input-area">
+      <input type="text" id="msg-input" placeholder="Ketik pesan..." maxlength="2000">
+      <button class="btn btn-primary" id="send-btn" style="border-radius:var(--radius-full); padding:0 24px;">Kirim</button>
+    </div>
+  `;
+  
+  await loadChatMessages(id);
+  
+  $('#send-btn').addEventListener('click', sendChatMessage);
+  $('#msg-input').addEventListener('keydown', e => { if (e.key === 'Enter') sendChatMessage(); });
+}
+
+async function loadChatMessages(id) {
+  try {
+    const { messages } = await api(`/api/conversations/${id}/messages`);
+    const list = $('#msg-list');
+    if (!list) return;
+    
+    list.innerHTML = messages.map(m => {
+      const isMine = m.sender_id == state.user.id;
+      const time = new Date(m.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+      return `<div class="msg-bubble ${isMine ? 'sent' : 'received'}">${escapeHtml(m.body)}<span class="msg-time">${time}</span></div>`;
+    }).join('');
+    list.scrollTop = list.scrollHeight;
+  } catch (error) {
+    console.error('Failed to load messages:', error);
+  }
+}
+
+async function sendChatMessage() {
+  const input = $('#msg-input');
+  const body = input.value.trim();
+  if (!body || !chatState.activeConvId) return;
+  
+  try {
+    await api(`/api/conversations/${chatState.activeConvId}/messages`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ body })
+    });
+    input.value = '';
+    await loadChatMessages(chatState.activeConvId);
+    await loadChatConversations();
+  } catch (error) {
+    toast('Gagal kirim pesan');
+  }
+}
+
+// Role switcher
+$$('.chat-role-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    $$('.chat-role-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    chatState.currentRole = btn.dataset.role;
+    chatState.activeConvId = null;
+    renderChatConversations();
+    $('#chat-window').innerHTML = `<div class="chat-empty"><span>💬</span><h3>Pilih Percakapan</h3><p>Klik salah satu obrolan di sebelah kiri untuk mulai chat.</p></div>`;
+  });
+});
+</script>
 </body>
 </html>

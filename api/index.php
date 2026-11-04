@@ -86,6 +86,33 @@ if ($apiPath === '/api/cleanup') {
     exit;
 }
 
+// 6. Rute Keranjang
+if ($apiPath === '/api/cart/add') {
+    $_GET['action'] = 'add';
+    require __DIR__ . '/cart.php';
+    exit;
+}
+if ($apiPath === '/api/cart') {
+    require __DIR__ . '/cart.php';
+    exit;
+}
+if ($apiPath === '/api/cart/remove') {
+    $_GET['action'] = 'remove';
+    require __DIR__ . '/cart.php';
+    exit;
+}
+if ($apiPath === '/api/cart/clear') {
+    $_GET['action'] = 'clear';
+    require __DIR__ . '/cart.php';
+    exit;
+}
+
+// 7. Rute Checkout
+if ($apiPath === '/api/checkout') {
+    require __DIR__ . '/checkout.php';
+    exit;
+}
+
 // Rute tidak dikenal
 http_response_code(404);
 header('Content-Type: application/json; charset=utf-8');

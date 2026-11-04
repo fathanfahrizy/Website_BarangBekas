@@ -57,44 +57,34 @@ function formatPrice(value) {
 function cardMarkup(item, own = false) {
   const sold = item.status === "sold";
   const image = item.image_url
-    ? `<img src="${escapeHtml(item.image_url)}" style="width:100%; height:100%; object-fit:cover; transition:transform 0.3s;" alt="${escapeHtml(item.title)}" loading="lazy">`
+    ? `<img src="${escapeHtml(item.image_url)}" style="width:100%; height:100%; object-fit:cover;" alt="${escapeHtml(item.title)}" loading="lazy">`
     : `<span style="font-size:40px; color:var(--color-text-light);" aria-hidden="true">📦</span>`;
-  
-  const locationBadge = item.meetup_location
-    ? `<span style="position:absolute; bottom:8px; left:8px; background:rgba(217, 119, 6, 0.95); color:#fff; font-size:10px; font-weight:bold; padding:4px 8px; border-radius:4px;">📍 ${escapeHtml(item.meetup_location.split('(')[0].trim())}</span>`
+  const soldBadge = sold
+    ? `<span style="position:absolute; top:8px; left:8px; background:rgba(239,68,68,0.9); color:#fff; font-size:10px; font-weight:bold; padding:4px 8px; border-radius:4px;">TERJUAL</span>`
     : '';
-  
-  const conditionBadge = !sold && item.item_condition
-    ? `<span style="position:absolute; top:8px; right:8px; background:rgba(92, 45, 145, 0.9); color:#fff; font-size:10px; font-weight:bold; padding:4px 8px; border-radius:4px;">${escapeHtml(conditionNames[item.item_condition] || "")}</span>`
-    : '';
-
+  const location = item.meetup_location
+    ? escapeHtml(item.meetup_location.split('(')[0].trim())
+    : 'Disepakati via chat';
   const sellerActions = own ? `
     <div style="display:flex; gap:6px; margin-top:10px; width:100%;">
       <button type="button" class="btn-outline" style="flex:1; padding:5px 8px; font-size:11px; font-weight:700;" data-edit-id="${escapeHtml(item.id)}">✏️ Edit</button>
-      ${!sold 
-        ? `<button type="button" class="btn-outline" style="padding:5px 8px; font-size:11px; font-weight:700;" data-status-id="${escapeHtml(item.id)}" title="Tandai terjual">Terjual</button>` 
-        : `<button type="button" class="btn-outline" style="padding:5px 8px; font-size:11px; font-weight:700;" data-reactivate-id="${escapeHtml(item.id)}" title="Aktifkan kembali">Aktifkan</button>`
-      }
+      ${!sold
+        ? `<button type="button" class="btn-outline" style="padding:5px 8px; font-size:11px; font-weight:700;" data-status-id="${escapeHtml(item.id)}" title="Tandai terjual">Terjual</button>`
+        : `<button type="button" class="btn-outline" style="padding:5px 8px; font-size:11px; font-weight:700;" data-reactivate-id="${escapeHtml(item.id)}" title="Aktifkan kembali">Aktifkan</button>`}
       <button type="button" class="btn-outline" style="padding:5px 8px; font-size:11px; font-weight:700; color:#ef4444; border-color:#ef4444;" data-delete-item-id="${escapeHtml(item.id)}" title="Hapus barang dari etalase">🗑️</button>
-    </div>
-  ` : '';
-
-  return `<article class="listing-card" style="background:#fff; border:1px solid var(--color-border); border-radius:var(--radius-md); overflow:hidden; cursor:pointer; display:flex; flex-direction:column;" data-listing-id="${escapeHtml(item.id)}" tabindex="0">
+    </div>` : '';
+  return `
+  <article class="listing-card" style="background:#fff; border:1px solid var(--color-border); border-radius:var(--radius-md); overflow:hidden; cursor:pointer; display:flex; flex-direction:column;" data-listing-id="${escapeHtml(item.id)}" tabindex="0">
     <div style="position:relative; height:180px; background:var(--color-bg-body); overflow:hidden; display:grid; place-items:center;">
       ${image}
-      ${sold ? '<span style="position:absolute; top:8px; left:8px; background:rgba(239, 68, 68, 0.9); color:#fff; font-size:10px; font-weight:bold; padding:4px 8px; border-radius:4px;">TERJUAL</span>' : `${conditionBadge}${locationBadge}`}
+      ${soldBadge}
     </div>
-    <div style="padding:16px; display:flex; flex-direction:column; flex:1;">
+    <div style="padding:12px 14px 14px; display:flex; flex-direction:column; flex:1;">
       <div style="font-size:10px; font-weight:800; color:var(--color-primary); text-transform:uppercase; margin-bottom:4px;">${escapeHtml(item.category)}</div>
-      <div style="font-size:14px; font-weight:600; color:var(--color-text-main); line-height:1.4; margin-bottom:8px; height:40px; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;" title="${escapeHtml(item.title)}">${escapeHtml(item.title)}</div>
-      <div style="font-size:18px; font-weight:800; color:var(--color-primary-dark); margin-bottom:12px;">${formatPrice(item.price)}</div>
-      <div style="margin-top:auto; padding-top:12px; border-top:1px solid var(--color-border); display:flex; flex-direction:column; gap:4px;">
-        <div style="display:flex; align-items:center; justify-content:space-between; font-size:11px; color:var(--color-text-muted);">
-          <span style="display:flex; align-items:center; gap:8px; font-weight:600; max-width:85%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${escapeHtml(item.seller_name)}">${avatarMarkup(item.seller_avatar, item.seller_name)}${escapeHtml(item.seller_name)}</span>
-          ${!own ? `<span style="font-weight:600;">${sold ? "Terjual" : "🤝 Siap COD"}</span>` : ""}
-        </div>
-        ${sellerActions}
-      </div>
+      <div style="font-size:14px; font-weight:600; color:var(--color-text-main); line-height:1.4; margin-bottom:6px; height:40px; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;" title="${escapeHtml(item.title)}">${escapeHtml(item.title)}</div>
+      <div style="font-size:18px; font-weight:800; color:var(--color-primary-dark); margin-bottom:8px;">${formatPrice(item.price)}</div>
+      <div style="margin-top:auto; padding-top:8px; border-top:1px solid var(--color-border); font-size:11px; color:var(--color-text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">📍 ${location}</div>
+      ${sellerActions}
     </div>
   </article>`;
 }
@@ -108,10 +98,10 @@ function renderListings(items, own = false) {
   if (empty) empty.classList.toggle("hidden", items.length > 0);
   grid.classList.toggle("hidden", items.length === 0);
   
-  grid.querySelectorAll(".listing-card").forEach((card) => {
+    grid.querySelectorAll(".listing-card").forEach((card) => {
     card.addEventListener("click", (event) => {
       if (event.target.closest("[data-status-id], [data-reactivate-id], [data-edit-id], [data-delete-item-id]")) return;
-      showListing(card.dataset.listingId);
+      window.location.href = "detailProduct.php?id=" + encodeURIComponent(card.dataset.listingId);
     });
   });
   grid.querySelectorAll("[data-status-id]").forEach((button) => {
@@ -125,6 +115,18 @@ function renderListings(items, own = false) {
   });
   grid.querySelectorAll("[data-delete-item-id]").forEach((button) => {
     button.addEventListener("click", (event) => { event.stopPropagation(); deleteListing(button.dataset.deleteItemId); });
+  });
+    grid.querySelectorAll("[data-cod-id]").forEach((button) => {
+    button.addEventListener("click", (event) => { event.stopPropagation(); startConversation(button.dataset.codId); });
+  });
+  grid.querySelectorAll("[data-cart-id]").forEach((button) => {
+    button.addEventListener("click", (event) => { event.stopPropagation(); addToCart(button.dataset.cartId); });
+  });
+  grid.querySelectorAll("[data-buy-id]").forEach((button) => {
+    button.addEventListener("click", (event) => { event.stopPropagation(); buyNow(button.dataset.buyId); });
+  });
+  grid.querySelectorAll("[data-view-id]").forEach((button) => {
+    button.addEventListener("click", (event) => { event.stopPropagation(); showListing(button.dataset.viewId); });
   });
 }
 
@@ -191,7 +193,7 @@ function updateUserUI() {
   $("#login-button")?.classList.toggle("hidden", !!state.user);
   $("#account-button")?.classList.toggle("hidden", !state.user);
   $("#messages-nav")?.classList.toggle("hidden", !state.user);
-  
+
   const topNpm = $("#top-user-npm");
   if (topNpm) topNpm.textContent = state.user ? state.user.npm : "-";
 
@@ -206,16 +208,22 @@ function updateUserUI() {
   }
 
   if (state.user) {
-    $("#account-button").innerHTML = state.user.avatarUrl
-      ? `<div class="avatar-sm" style="overflow:hidden;"><img src="${escapeHtml(state.user.avatarUrl)}" style="width:100%; height:100%; object-fit:cover;" alt=""></div>`
-      : `<div class="avatar-sm">${escapeHtml((state.user.displayName || "?").charAt(0).toUpperCase())}</div>`;
-    $("#account-button").title = state.user.displayName;
-    if ($("#profile-form")) {
-      $("#profile-form").elements.fullName.value = state.user.name;
-      $("#profile-form").elements.username.value = state.user.username || "";
-      $("#profile-form").elements.npm.value = state.user.npm;
-      $("#profile-form").elements.phone.value = state.user.phone;
+    const accountBtn = $("#account-button");
+    if (accountBtn) {
+      accountBtn.innerHTML = state.user.avatarUrl
+        ? `<div class="avatar-sm" style="overflow:hidden;"><img src="${escapeHtml(state.user.avatarUrl)}" style="width:100%; height:100%; object-fit:cover;" alt=""></div>`
+        : `<div class="avatar-sm">${escapeHtml((state.user.displayName || "?").charAt(0).toUpperCase())}</div>`;
+      accountBtn.title = state.user.displayName;
     }
+
+    const profileForm = $("#profile-form");
+    if (profileForm) {
+      profileForm.elements.fullName.value = state.user.name;
+      profileForm.elements.username.value = state.user.username || "";
+      profileForm.elements.npm.value = state.user.npm;
+      profileForm.elements.phone.value = state.user.phone;
+    }
+
     const profilePhoto = $("#profile-photo");
     if (profilePhoto) {
       profilePhoto.innerHTML = state.user.avatarUrl
@@ -941,4 +949,166 @@ async function initialize() {
   } catch (error) { toast(error.message); }
 }
 
+// ==========================================
+// KERANJANG BELANJA (CART)
+// ==========================================
+async function refreshCartCount() {
+  const badge = $("#cart-count");
+  if (!badge) return;
+  if (!state.user) { badge.classList.add("hidden"); return; }
+  try {
+    const { count } = await api("/api/cart");
+    badge.textContent = count;
+    badge.classList.toggle("hidden", !count);
+  } catch (e) { /* silent */ }
+}
+
+async function loadCart() {
+  const wrap = $("#cart-items");
+  const empty = $("#cart-empty");
+  const subtotalEl = $("#cart-subtotal");
+  if (!wrap) return;
+  wrap.innerHTML = `<div style="padding:24px; text-align:center; color:var(--color-text-muted);">Memuat keranjang...</div>`;
+  try {
+    const { cart, subtotal } = await api("/api/cart");
+    if (subtotalEl) subtotalEl.textContent = formatPrice(subtotal);
+    if (!cart.length) {
+      wrap.innerHTML = "";
+      if (empty) empty.classList.remove("hidden");
+      return;
+    }
+    if (empty) empty.classList.add("hidden");
+    wrap.innerHTML = cart.map((item) => `
+      <div style="display:flex; gap:12px; align-items:center; border:1px solid var(--color-border); border-radius:var(--radius-md); padding:10px; background:#fff;">
+        <div style="width:56px; height:56px; flex-shrink:0; background:var(--color-bg-body); border-radius:var(--radius-sm); overflow:hidden; display:grid; place-items:center;">
+          ${item.image_url ? `<img src="${escapeHtml(item.image_url)}" style="width:100%; height:100%; object-fit:cover;" alt="">` : "📦"}
+        </div>
+        <div style="flex:1; min-width:0;">
+          <div style="font-size:13px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(item.title)}</div>
+          <div style="font-size:12px; color:var(--color-text-muted);">${escapeHtml(item.seller_name)}</div>
+          <div style="font-size:14px; font-weight:800; color:var(--color-primary-dark);">${formatPrice(item.price)}</div>
+          ${item.is_available ? "" : `<span style="font-size:10px; font-weight:700; color:var(--color-danger);">Barang sudah tidak tersedia</span>`}
+        </div>
+        <button type="button" class="btn-outline" style="padding:6px 10px; font-size:11px; font-weight:700; color:#ef4444; border-color:#ef4444;" data-cart-remove="${escapeHtml(item.cart_id)}">🗑️</button>
+      </div>
+    `).join("");
+    wrap.querySelectorAll("[data-cart-remove]").forEach((btn) => {
+      btn.addEventListener("click", () => removeFromCart(btn.dataset.cartRemove));
+    });
+  } catch (e) {
+    wrap.innerHTML = "";
+    toast(e.message);
+  }
+}
+
+async function addToCart(listingId) {
+  if (!state.user) { window.location.href = "login.html"; return; }
+  try {
+    await api("/api/cart/add", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ listingId }),
+    });
+    toast("Barang masuk keranjang! 🛒");
+    await refreshCartCount();
+  } catch (e) { toast(e.message); }
+}
+
+async function buyNow(listingId) {
+  if (!state.user) { window.location.href = "login.html"; return; }
+  try {
+    await api("/api/cart/add", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ listingId }),
+    });
+  } catch (e) {
+    // Kalau barang emang udah ada di keranjang, lanjut aja ke checkout
+    if (!/sudah ada/i.test(e.message)) { toast(e.message); return; }
+  }
+  window.location.href = "cart.php";
+}
+
+async function removeFromCart(cartId) {
+  try {
+    await api("/api/cart/remove", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ cartId: Number(cartId) }),
+    });
+    toast("Barang dihapus dari keranjang.");
+    await Promise.all([loadCart(), refreshCartCount()]);
+  } catch (e) { toast(e.message); }
+}
+
+async function clearCart() {
+  if (!confirm("Kosongkan seluruh isi keranjang?")) return;
+  try {
+    await api("/api/cart/clear", { method: "DELETE" });
+    toast("Keranjang dikosongkan.");
+    await Promise.all([loadCart(), refreshCartCount()]);
+  } catch (e) { toast(e.message); }
+}
+
+async function codToChat(listingId) {
+  if (!state.user) { window.location.href = "login.html"; return; }
+  try {
+    const { conversationId } = await api("/api/conversations", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ listingId }),
+    });
+    window.location.href = "chat.php?conv=" + conversationId;
+  } catch (e) { toast(e.message); }
+}
+
+// Tombol keranjang di header: BELUM LOGIN -> lempar ke login.html
+const cartNav = $("#cart-nav");
+if (cartNav) {
+  cartNav.addEventListener("click", () => {
+    if (!state.user) { window.location.href = "login.html"; return; }
+    window.location.href = "cart.php";
+  });
+}
+
+const cartClearBtn = $("#cart-clear-btn");
+if (cartClearBtn) cartClearBtn.addEventListener("click", clearCart);
+
+const cartCheckoutBtn = $("#cart-checkout-btn");
+if (cartCheckoutBtn) cartCheckoutBtn.addEventListener("click", () => toast("Fitur checkout segera hadir 👀"));
+
+// Badge keranjang auto-update tiap kali UI user di-refresh
+const originalUpdateUserUI = updateUserUI;
+updateUserUI = function () {
+  originalUpdateUserUI();
+  refreshCartCount();
+};
+refreshCartCount();
+
+
+
 initialize();
+
+// === LOGIC BARU: Handle Multiple Conversation dari URL (?convs=id1,id2) ===
+const urlParams = new URLSearchParams(window.location.search);
+const convsParam = urlParams.get('convs');
+
+if (convsParam) {
+  const targetIds = convsParam.split(',');
+  
+  // Tunggu sebentar agar daftar chat di sidebar selesai di-render
+  setTimeout(() => {
+    // Buka obrolan PERTAMA dari daftar yang dibuat
+    const firstId = targetIds[0];
+    const targetConv = chatState.conversations.find(c => String(c.id) === String(firstId));
+    
+    if (targetConv) {
+      openChat(firstId, targetConv);
+      
+      // Kasih tau user kalau ada penjual lain yang juga diajak chat
+      if (targetIds.length > 1) {
+        toast(`Obrolan dengan ${targetIds.length} penjual telah dibuat. Cek sidebar!`);
+      }
+    }
+  }, 600); // Delay 600ms biar data conversation ke-load duluan
+}

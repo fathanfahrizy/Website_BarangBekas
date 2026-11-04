@@ -59,12 +59,22 @@
         </svg>
         <span id="etalase-dot" class="hidden" style="position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; background-color: #f59e0b; border-radius: 50%; border: 2px solid #fff;"></span>
       </button>
+      <!-- Ikon Keranjang -->
+<button class="action-icon" id="cart-nav" title="Keranjang" style="position: relative; padding: 8px;">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="9" cy="21" r="1"></circle>
+    <circle cx="20" cy="21" r="1"></circle>
+    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+  </svg>
+  <span id="cart-count" class="counter hidden" style="position:absolute; top:2px; right:0; min-width:16px; font-size:10px;">0</span>
+</button>
       <button class="action-icon signed-in-only hidden" id="account-button" title="Profil">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
           <circle cx="12" cy="7" r="4"></circle>
         </svg>
       </button>
+      
       <button class="btn" id="login-button">LOGIN</button>
       <button class="btn btn-sell" id="sell-button">JUAL BARANG</button>
     </div>

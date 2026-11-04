@@ -15,3 +15,7 @@ desktop.ini
 # 💻 File Settingan Editor (VS Code / JetBrains)
 .vscode/
 .idea/
+
+# Jangan track file rahasia
+api/config/secrets.php
+.env
