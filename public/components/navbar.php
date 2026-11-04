@@ -1,22 +1,28 @@
 <?php
-// Ambil data user & cart count untuk navbar
+// ============================================================
+// NAVBAR COMPONENT - PasarKampus Gunadarma
+// ============================================================
 if (session_status() === PHP_SESSION_NONE) session_start();
+
 $userId = $_SESSION['userId'] ?? null;
 $userName = $_SESSION['userName'] ?? 'User';
 $userInitial = strtoupper(substr($userName, 0, 1));
 
-// Fetch cart count (kalau user login)
+// Fetch cart count
 $cartCount = 0;
 if ($userId) {
     try {
         $pdo = require __DIR__ . '/../../config/database.php';
         $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM carts WHERE user_id = ?");
         $stmt->execute([$userId]);
-        $cartCount = $stmt->fetch()['count'];
+        $result = $stmt->fetch();
+        $cartCount = $result ? (int)$result['count'] : 0;
     } catch (Exception $e) {
         $cartCount = 0;
     }
 }
+
+$isLoggedIn = !empty($userId);
 ?>
 
 <!-- 1. TOP UTILITY BAR -->
@@ -80,29 +86,39 @@ if ($userId) {
         </svg>
         <span id="etalase-dot" class="hidden" style="position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; background-color: #f59e0b; border-radius: 50%; border: 2px solid #fff;"></span>
       </button>
-      <!-- Ikon Keranjang -->
-<button class="action-icon" id="cart-nav" title="Keranjang" style="position: relative; padding: 8px;">
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <circle cx="9" cy="21" r="1"></circle>
-    <circle cx="20" cy="21" r="1"></circle>
-    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-  </svg>
-  <span id="cart-count" class="counter <?= $cartCount > 0 ? '' : 'hidden' ?>" style="position:absolute; top:2px; right:0; min-width:16px; height:16px; font-size:10px; background:#ef4444; color:#fff; border-radius:50%; text-align:center; line-height:16px; font-weight:700;"><?= $cartCount ?></span>
-</button>
-      <button class="action-icon signed-in-only hidden" id="account-button" title="Profil" style="display: flex; align-items: center; gap: 8px;">
-  <!-- Avatar Bulat dengan Initial Nama -->
-  <div style="width: 32px; height: 32px; background: var(--color-primary, #4361ee); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; flex-shrink: 0;">
-    <?= $userInitial ?>
-  </div>
-</button>
       
-      <button class="btn signed-out-only" id="login-button">LOGIN</button>
+      <!-- Ikon Keranjang dengan Badge Dinamis -->
+      <button class="action-icon" id="cart-nav" title="Keranjang" style="position: relative; padding: 8px;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="9" cy="21" r="1"></circle>
+          <circle cx="20" cy="21" r="1"></circle>
+          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+        </svg>
+        <?php if ($cartCount > 0): ?>
+          <span class="counter" style="position:absolute; top:2px; right:0; min-width:16px; height:16px; font-size:10px; background:#ef4444; color:#fff; border-radius:50%; text-align:center; line-height:16px; font-weight:700;"><?= $cartCount ?></span>
+        <?php endif; ?>
+      </button>
+      
+      <!-- Avatar User (Hanya muncul kalau login) -->
+      <?php if ($isLoggedIn): ?>
+        <button class="action-icon" id="account-button" title="Profil" style="display: flex; align-items: center; gap: 8px;">
+          <div style="width: 32px; height: 32px; background: var(--color-primary, #4361ee); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; flex-shrink: 0;">
+            <?= htmlspecialchars($userInitial) ?>
+          </div>
+        </button>
+      <?php endif; ?>
+      
+      <!-- Tombol Login (Hanya muncul kalau belum login) -->
+      <?php if (!$isLoggedIn): ?>
+        <button class="btn" id="login-button">LOGIN</button>
+      <?php endif; ?>
+      
       <button class="btn btn-sell" id="sell-button">JUAL BARANG</button>
     </div>
   </div>
 </header>
 
-<!-- DROPDOWN FILTER HEADER (muncul di bawah tombol filter header) -->
+<!-- DROPDOWN FILTER HEADER -->
 <div id="header-filter-dropdown" class="hidden" style="position: absolute; top: 100%; left: 50%; transform: translateX(-50%); margin-top: 8px; background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 20px; min-width: 320px; z-index: 100; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
   <div style="display: grid; gap: 12px;">
     <div class="form-group" style="margin:0;">

@@ -1,24 +1,12 @@
 <?php
-// 1. INI PALING ATAS (SERVER SIDE LOGIC)
+// ============================================================
+// Cart Page - PasarKampus Gunadarma
+// ============================================================
 if (session_status() === PHP_SESSION_NONE) session_start();
-
-$userId = $_SESSION['userId'] ?? null;
-$userName = $_SESSION['userName'] ?? 'User';
-$userInitial = strtoupper(substr($userName, 0, 1));
-
-$cartCount = 0;
-if ($userId) {
-    try {
-        $pdo = require __DIR__ . '/../../config/database.php';
-        $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM carts WHERE user_id = ?");
-        $stmt->execute([$userId]);
-        $result = $stmt->fetch();
-        $cartCount = $result ? (int)$result['count'] : 0;
-    } catch (Exception $e) {
-        $cartCount = 0;
-    }
+if (empty($_SESSION['userId'])) {
+    header('Location: login.html');
+    exit;
 }
-$isLoggedIn = !empty($userId);
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -117,7 +105,7 @@ $isLoggedIn = !empty($userId);
 </head>
 <body>
 
-    <?php include 'public/components/navbar.php'; ?>
+    <?php include 'components/navbar.php'; ?>
 
     <!-- Konten Utama Chat -->
     <main class="container" style="padding-bottom: 80px;">
