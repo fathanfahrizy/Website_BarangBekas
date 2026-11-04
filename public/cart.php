@@ -110,13 +110,6 @@ if (empty($_SESSION['userId'])) {
 <body>
 <?php include 'components/navbar.php'; ?>
 
-<div class="cart-page-header">
-  <div class="container">
-    <h1>🛒 Keranjang Saya</h1>
-    <p>Barang preloved yang kamu simpan untuk dibeli.</p>
-  </div>
-</div>
-
 <main class="container" style="padding-bottom: 120px;">
   <div class="cart-list" id="cart-page-list">
     <div style="padding:40px; text-align:center; color:var(--color-text-muted);">Memuat keranjang...</div>

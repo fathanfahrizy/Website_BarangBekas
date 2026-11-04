@@ -27,12 +27,6 @@ if (empty($_SESSION['userId'])) { header('Location: login.html'); exit; }
 <body>
     <?php include 'components/navbar.php'; ?>>
 
-    <div class="etalase-header">
-        <div class="container">
-            <h1>🏠 Etalase Saya</h1>
-            <p>Kelola barang preloved yang sedang kamu jual.</p>
-        </div>
-    </div>
 
     <main class="container" style="padding-bottom: 80px;">
         <!-- Statistik Singkat -->

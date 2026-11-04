@@ -113,6 +113,12 @@ if ($apiPath === '/api/checkout') {
     exit;
 }
 
+// 8. Rute Wishlist
+if ($apiPath === '/api/wishlist') {
+    require __DIR__ . '/wishlist.php';
+    exit;
+}
+
 // Rute tidak dikenal
 http_response_code(404);
 header('Content-Type: application/json; charset=utf-8');

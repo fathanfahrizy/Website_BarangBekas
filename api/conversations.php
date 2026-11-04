@@ -60,8 +60,9 @@ if ($method === 'GET' && $id && $action === 'messages') {
         jsonResponse(['error' => 'Percakapan tidak ditemukan.'], 404);
     }
 
+    // TAMBAHAN: attachment_url dan attachment_type di SELECT
     $stmt = $pdo->prepare("
-        SELECT m.id, m.body, m.created_at, m.sender_id,
+        SELECT m.id, m.body, m.attachment_url, m.attachment_type, m.created_at, m.sender_id,
                COALESCE(u.username, u.full_name) AS sender_name
         FROM messages m 
         JOIN users u ON u.id = m.sender_id
@@ -90,7 +91,6 @@ if ($method === 'POST' && !$id) {
         jsonResponse(['error' => 'Anda tidak dapat memulai chat dengan diri sendiri.'], 400);
     }
 
-    // Cari atau buat percakapan
     $findConv = $pdo->prepare("
         SELECT id FROM conversations 
         WHERE listing_id = ? AND buyer_id = ? AND seller_id = ?
@@ -99,7 +99,6 @@ if ($method === 'POST' && !$id) {
     $existing = $findConv->fetch();
 
     if ($existing) {
-        // Jika pembeli sebelumnya pernah menghapus obrolan ini, un-hide kembali untuk pembeli
         $pdo->prepare("UPDATE conversations SET deleted_by_buyer = 0 WHERE id = ?")->execute([$existing['id']]);
         jsonResponse(['conversationId' => (int)$existing['id']], 201);
     }
@@ -112,39 +111,81 @@ if ($method === 'POST' && !$id) {
     jsonResponse(['conversationId' => (int)$pdo->lastInsertId()], 201);
 }
 
-// 4. Kirim Pesan Chat Baru
+// 4. Kirim Pesan Chat Baru (SUPPORT FORMDATA: TEKS + FILE)
 if ($method === 'POST' && $id && $action === 'messages') {
-    $input = array_merge($_POST, getJsonInput());
-    $body = trim((string)($input['body'] ?? ''));
+    // Baca langsung dari $_POST dan $_FILES (JANGAN pakai getJsonInput)
+    $body = trim((string)($_POST['body'] ?? ''));
+    $hasAttachment = isset($_FILES['attachment']) && $_FILES['attachment']['error'] === UPLOAD_ERR_OK;
 
-    if (mb_strlen($body) < 1 || mb_strlen($body) > 2000) {
-        jsonResponse(['error' => 'Pesan harus berisi 1–2000 karakter.'], 400);
+    // Validasi: Harus ada teks ATAU ada file
+    if (mb_strlen($body) < 1 && !$hasAttachment) {
+        jsonResponse(['error' => 'Pesan atau lampiran harus diisi.'], 400);
+    }
+    if (mb_strlen($body) > 2000) {
+        jsonResponse(['error' => 'Pesan maksimal 2000 karakter.'], 400);
     }
 
     if (!isConversationParticipant($pdo, $id, $userId)) {
         jsonResponse(['error' => 'Percakapan tidak ditemukan.'], 404);
     }
 
+    // --- LOGIC UPLOAD FILE ---
+    $attachmentUrl = null;
+    $attachmentType = null;
+
+    if ($hasAttachment) {
+        $file = $_FILES['attachment'];
+        $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+        $allowedExts = ['jpg', 'jpeg', 'png', 'webp', 'mp4', 'mov', 'avi'];
+        
+        if (in_array($ext, $allowedExts)) {
+            $newName = 'msg_' . uniqid() . '_' . time() . '.' . $ext;
+            $uploadDir = __DIR__ . '/../uploads/chat/';
+            
+            // Buat folder kalau belum ada
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
+            
+            if (move_uploaded_file($file['tmp_name'], $uploadDir . $newName)) {
+                $attachmentUrl = '/uploads/chat/' . $newName;
+                $attachmentType = in_array($ext, ['mp4', 'mov', 'avi']) ? 'video' : 'image';
+            } else {
+                jsonResponse(['error' => 'Gagal mengupload file. Cek izin folder uploads/chat/'], 500);
+            }
+        } else {
+            jsonResponse(['error' => 'Format file tidak didukung.'], 400);
+        }
+    }
+
+    // INSERT ke database
     $stmt = $pdo->prepare("
-        INSERT INTO messages (conversation_id, sender_id, body)
-        VALUES (?, ?, ?)
+        INSERT INTO messages (conversation_id, sender_id, body, attachment_url, attachment_type)
+        VALUES (?, ?, ?, ?, ?)
     ");
-    $stmt->execute([$id, $userId, $body]);
+    
+    try {
+        $stmt->execute([$id, $userId, $body, $attachmentUrl, $attachmentType]);
+    } catch (PDOException $e) {
+        // Ini bakal nongol kalau kolom attachment belum dibuat di database
+        jsonResponse(['error' => 'Database error: ' . $e->getMessage()], 500);
+    }
+    
     $msgId = (int)$pdo->lastInsertId();
 
-    // Pulihkan percakapan agar terlihat kembali di kotak masuk kedua belah pihak
+    // Pulihkan percakapan
     $pdo->prepare("UPDATE conversations SET deleted_by_buyer = 0, deleted_by_seller = 0 WHERE id = ?")->execute([$id]);
 
+    // Ambil data pesan yang baru di-insert
     $getMsg = $pdo->prepare("
-        SELECT id, body, created_at, sender_id 
-        FROM messages 
-        WHERE id = ?
+        SELECT id, body, attachment_url, attachment_type, created_at, sender_id 
+        FROM messages WHERE id = ?
     ");
     $getMsg->execute([$msgId]);
     jsonResponse(['message' => $getMsg->fetch()], 201);
 }
 
-// 5. Hapus Percakapan / Obrolan (HANYA untuk akun yang sedang login)
+// 5. Hapus Percakapan / Obrolan
 if (($method === 'DELETE' && $id) || ($method === 'POST' && $id && $action === 'delete')) {
     $stmt = $pdo->prepare("SELECT id, buyer_id, seller_id, deleted_by_buyer, deleted_by_seller FROM conversations WHERE id = ? AND (buyer_id = ? OR seller_id = ?)");
     $stmt->execute([$id, $userId, $userId]);
@@ -155,14 +196,11 @@ if (($method === 'DELETE' && $id) || ($method === 'POST' && $id && $action === '
     }
 
     if ((int)$conv['buyer_id'] === $userId) {
-        // Tandai dihapus hanya untuk pembeli
         $pdo->prepare("UPDATE conversations SET deleted_by_buyer = 1 WHERE id = ?")->execute([$id]);
     } else {
-        // Tandai dihapus hanya untuk penjual
         $pdo->prepare("UPDATE conversations SET deleted_by_seller = 1 WHERE id = ?")->execute([$id]);
     }
 
-    // Jika KEDUA belah pihak (pembeli & penjual) sudah sama-sama menghapus, barulah obrolan dihapus permanen
     $pdo->prepare("DELETE FROM conversations WHERE id = ? AND deleted_by_buyer = 1 AND deleted_by_seller = 1")->execute([$id]);
 
     jsonResponse(['success' => true, 'message' => 'Obrolan berhasil dihapus dari kotak masuk akun Anda.']);

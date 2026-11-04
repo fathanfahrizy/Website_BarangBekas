@@ -86,6 +86,14 @@ $isLoggedIn = !empty($userId);
         </svg>
         <span id="etalase-dot" class="hidden" style="position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; background-color: #f59e0b; border-radius: 50%; border: 2px solid #fff;"></span>
       </button>
+      <!-- Ikon Wishlist -->
+<button class="action-icon signed-in-only hidden" id="wishlist-nav" title="Wishlist" style="position: relative; padding: 8px;">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+  </svg>
+  <span id="wishlist-count" class="counter hidden" style="position:absolute; top:2px; right:0; min-width:16px; height:16px; font-size:10px; background:#ef4444; color:#fff; border-radius:50%; text-align:center; line-height:16px; font-weight:700;">0</span>
+</button>
+
       
       <!-- Ikon Keranjang dengan Badge Dinamis -->
       <button class="action-icon" id="cart-nav" title="Keranjang" style="position: relative; padding: 8px;">
@@ -119,56 +127,3 @@ $isLoggedIn = !empty($userId);
 </header>
 
 <!-- DROPDOWN FILTER HEADER -->
-<div id="header-filter-dropdown" class="hidden" style="position: absolute; top: 100%; left: 50%; transform: translateX(-50%); margin-top: 8px; background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 20px; min-width: 320px; z-index: 100; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-  <div style="display: grid; gap: 12px;">
-    <div class="form-group" style="margin:0;">
-      <label style="font-size: 11px; font-weight: 600; text-transform: uppercase; margin-bottom: 4px; display: block;">Kategori</label>
-      <select id="header-category-filter" class="form-input" style="height: 36px; width: 100%;">
-        <option value="">Semua Kategori</option>
-      </select>
-    </div>
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-      <div class="form-group" style="margin:0;">
-        <label style="font-size: 11px; font-weight: 600; text-transform: uppercase; margin-bottom: 4px; display: block;">Harga Min</label>
-        <input type="number" id="header-min-price" class="form-input" placeholder="0" style="height: 36px;">
-      </div>
-      <div class="form-group" style="margin:0;">
-        <label style="font-size: 11px; font-weight: 600; text-transform: uppercase; margin-bottom: 4px; display: block;">Harga Max</label>
-        <input type="number" id="header-max-price" class="form-input" placeholder="Max" style="height: 36px;">
-      </div>
-    </div>
-    <div class="form-group" style="margin:0;">
-      <label style="font-size: 11px; font-weight: 600; text-transform: uppercase; margin-bottom: 4px; display: block;">Kondisi</label>
-      <select id="header-condition" class="form-input" style="height: 36px; width: 100%;">
-        <option value="">Semua Kondisi</option>
-        <option value="like_new">Seperti Baru</option>
-        <option value="good">Bagus</option>
-        <option value="fair">Layak</option>
-        <option value="needs_repair">Perlu Perbaikan</option>
-      </select>
-    </div>
-    <div class="form-group" style="margin:0;">
-      <label style="font-size: 11px; font-weight: 600; text-transform: uppercase; margin-bottom: 4px; display: block;">Lokasi COD</label>
-      <select id="header-location" class="form-input" style="height: 36px; width: 100%;">
-        <option value="">Semua Kampus</option>
-        <option value="Kampus D">Kampus D (Margonda)</option>
-        <option value="Kampus E">Kampus E (Kelapa Dua)</option>
-        <option value="Kampus G">Kampus G (Lab)</option>
-        <option value="Kampus H">Kampus H (Simatupang)</option>
-        <option value="Kampus J">Kampus J (Kalimalang)</option>
-      </select>
-    </div>
-    <div class="form-group" style="margin:0;">
-      <label style="font-size: 11px; font-weight: 600; text-transform: uppercase; margin-bottom: 4px; display: block;">Urutkan</label>
-      <select id="header-sort" class="form-input" style="height: 36px; width: 100%;">
-        <option value="newest">Terbaru</option>
-        <option value="price_asc">Harga Terendah</option>
-        <option value="price_desc">Harga Tertinggi</option>
-      </select>
-    </div>
-    <div style="display: flex; gap: 8px; margin-top: 8px;">
-      <button id="header-apply-filters" class="btn btn-primary" style="flex: 1; height: 36px; font-weight: 600;">Terapkan</button>
-      <button id="header-reset-filters" class="btn btn-outline" style="height: 36px; font-weight: 600;">Reset</button>
-    </div>
-  </div>
-</div>

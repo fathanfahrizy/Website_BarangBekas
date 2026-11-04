@@ -59,12 +59,27 @@ function cardMarkup(item, own = false) {
   const image = item.image_url
     ? `<img src="${escapeHtml(item.image_url)}" style="width:100%; height:100%; object-fit:cover;" alt="${escapeHtml(item.title)}" loading="lazy">`
     : `<span style="font-size:40px; color:var(--color-text-light);" aria-hidden="true">📦</span>`;
+  
   const soldBadge = sold
     ? `<span style="position:absolute; top:8px; left:8px; background:rgba(239,68,68,0.9); color:#fff; font-size:10px; font-weight:bold; padding:4px 8px; border-radius:4px;">TERJUAL</span>`
     : '';
+
+  // CEK: Apakah ini barang milik user yang sedang login?
+  const isOwnProduct = state.user && String(state.user.id) === String(item.seller_id);
+
+  // TOMBOL WISHLIST: Hanya muncul jika BUKAN halaman "Etalase Saya" (!own) DAN BUKAN barang sendiri (!isOwnProduct)
+  const wishlistBtn = (!own && !isOwnProduct) ? `
+    <button class="btn-wishlist-card" data-listing-id="${item.id}" aria-label="Tambah ke Wishlist">
+      <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+      </svg>
+    </button>
+  ` : '';
+
   const location = item.meetup_location
     ? escapeHtml(item.meetup_location.split('(')[0].trim())
     : 'Disepakati via chat';
+    
   const sellerActions = own ? `
     <div style="display:flex; gap:6px; margin-top:10px; width:100%;">
       <button type="button" class="btn-outline" style="flex:1; padding:5px 8px; font-size:11px; font-weight:700;" data-edit-id="${escapeHtml(item.id)}">✏️ Edit</button>
@@ -73,11 +88,13 @@ function cardMarkup(item, own = false) {
         : `<button type="button" class="btn-outline" style="padding:5px 8px; font-size:11px; font-weight:700;" data-reactivate-id="${escapeHtml(item.id)}" title="Aktifkan kembali">Aktifkan</button>`}
       <button type="button" class="btn-outline" style="padding:5px 8px; font-size:11px; font-weight:700; color:#ef4444; border-color:#ef4444;" data-delete-item-id="${escapeHtml(item.id)}" title="Hapus barang dari etalase">🗑️</button>
     </div>` : '';
+    
   return `
-  <article class="listing-card" style="background:#fff; border:1px solid var(--color-border); border-radius:var(--radius-md); overflow:hidden; cursor:pointer; display:flex; flex-direction:column;" data-listing-id="${escapeHtml(item.id)}" tabindex="0">
+  <article class="listing-card" style="background:#fff; border:1px solid var(--color-border); border-radius:var(--radius-md); overflow:hidden; cursor:pointer; display:flex; flex-direction:column; position:relative;" data-listing-id="${escapeHtml(item.id)}" tabindex="0">
     <div style="position:relative; height:180px; background:var(--color-bg-body); overflow:hidden; display:grid; place-items:center;">
       ${image}
       ${soldBadge}
+      ${wishlistBtn} 
     </div>
     <div style="padding:12px 14px 14px; display:flex; flex-direction:column; flex:1;">
       <div style="font-size:10px; font-weight:800; color:var(--color-primary); text-transform:uppercase; margin-bottom:4px;">${escapeHtml(item.category)}</div>
@@ -193,6 +210,7 @@ function updateUserUI() {
   $("#login-button")?.classList.toggle("hidden", !!state.user);
   $("#account-button")?.classList.toggle("hidden", !state.user);
   $("#messages-nav")?.classList.toggle("hidden", !state.user);
+  $("#wishlist-nav")?.classList.toggle("hidden", !state.user);
 
   const topNpm = $("#top-user-npm");
   if (topNpm) topNpm.textContent = state.user ? state.user.npm : "-";
@@ -939,6 +957,13 @@ async function initialize() {
     await loadCategories();
     await refreshUser();
     await loadListings();
+    
+    // TAMBAHIN INI: Load status wishlist & cart
+    if (state.user) {
+        await loadUserWishlistStatus();
+        await loadUserCartStatus();
+    }
+    
     state.pollTimer = setInterval(() => {
       if (!state.user) return;
       refreshConversations().catch((e) => toast(e.message));
@@ -1071,6 +1096,17 @@ if (cartNav) {
   });
 }
 
+// Wishlist nav button
+if ($("#wishlist-nav")) {
+    $("#wishlist-nav").addEventListener("click", () => {
+        if (!state.user) { 
+            window.location.href = "login.html"; 
+            return; 
+        }
+        window.location.href = "wishlist.php";
+    });
+}
+
 const cartClearBtn = $("#cart-clear-btn");
 if (cartClearBtn) cartClearBtn.addEventListener("click", clearCart);
 
@@ -1112,3 +1148,73 @@ if (convsParam) {
     }
   }, 600); // Delay 600ms biar data conversation ke-load duluan
 }
+
+// ============================================================
+// LOAD STATUS WISHLIST & CART (Biar persisten saat reload)
+// ============================================================
+
+let userWishlistIds = new Set();
+let userCartIds = new Set();
+
+async function loadUserWishlistStatus() {
+    try {
+        const res = await fetch('/api/wishlist');
+        const data = await res.json();
+        if (data.wishlists) {
+            userWishlistIds = new Set(data.wishlists.map(item => item.id));
+            
+            // Update semua tombol hati di halaman
+            document.querySelectorAll('.btn-wishlist-card').forEach(btn => {
+                const id = parseInt(btn.dataset.listingId);
+                if (userWishlistIds.has(id)) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+            
+            // Update badge di navbar
+            updateWishlistBadge();
+        }
+    } catch (e) {
+        console.log('Gagal load wishlist status');
+    }
+}
+
+async function loadUserCartStatus() {
+    try {
+        const res = await fetch('/api/cart');
+        const data = await res.json();
+        if (data.cart) {
+            userCartIds = new Set(data.cart.map(item => item.listing_id));
+            
+            // Update semua tombol cart di halaman
+            document.querySelectorAll('.btn-add-cart').forEach(btn => {
+                const id = parseInt(btn.dataset.listingId);
+                if (userCartIds.has(id)) {
+                    btn.classList.add('active');
+                    btn.innerHTML = '✓ Dalam Keranjang';
+                } else {
+                    btn.classList.remove('active');
+                    btn.innerHTML = '🛒 Tambah ke Keranjang';
+                }
+            });
+        }
+    } catch (e) {
+        console.log('Gagal load cart status');
+    }
+}
+
+function updateWishlistBadge() {
+    const badge = $('#wishlist-count');
+    if (badge) {
+        const count = userWishlistIds.size;
+        badge.textContent = count;
+        badge.classList.toggle('hidden', count === 0);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    loadUserWishlistStatus();
+    updateWishlistBadge();
+});
