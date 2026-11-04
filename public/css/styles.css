@@ -838,45 +838,40 @@ body { background-image: none; }
   .product-grid { gap: 12px; }
 }
 
-/* Tombol Wishlist - Default (hati kosong) */
+/* Style Tombol Wishlist */
 .btn-wishlist-card {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    background: rgba(255, 255, 255, 0.9);
-    border: none;
-    border-radius: 50%;
-    width: 36px;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    z-index: 5;
-    transition: all 0.2s ease;
-}
-
-.btn-wishlist-card:hover {
-    transform: scale(1.1);
-    background: #fff;
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 5;
+  transition: all 0.2s ease;
 }
 
 .btn-wishlist-card svg {
-    width: 20px;
-    height: 20px;
-    stroke: #ef4444;
-    fill: none; /* Default: kosong */
-    transition: all 0.2s ease;
+  width: 20px;
+  height: 20px;
+  stroke: #ef4444;
+  fill: none; /* Default: Hati Kosong */
+  transition: all 0.2s ease;
 }
 
-/* Tombol Wishlist - Active (hati merah penuh) */
+/* Status Aktif: Hati Merah Penuh */
 .btn-wishlist-card.active svg {
-    fill: #ef4444; /* Merah penuh */
-    stroke: #ef4444;
+  fill: #ef4444; /* Merah Penuh */
+  stroke: #ef4444;
 }
 
 .btn-wishlist-card.active {
-    background: #fff;
-    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
 }

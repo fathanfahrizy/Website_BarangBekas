@@ -113,9 +113,6 @@ function createProductCard(item, options = {}) {
          <button class="btn-remove-wishlist" data-listing-id="${item.id}" style="flex:1; padding:10px; background:#fef2f2; color:#ef4444; border:1px solid #fecaca; border-radius:var(--radius-md); font-weight:600; cursor:pointer; font-size:13px;">
            🗑️ Hapus
          </button>
-         <button class="btn-chat-seller" data-listing-id="${item.id}" style="flex:1; padding:10px; background:var(--color-primary); color:#fff; border:none; border-radius:var(--radius-md); font-weight:600; cursor:pointer; font-size:13px;">
-           💬 Chat Penjual
-         </button>
        </div>`
     : '';
 
@@ -233,41 +230,46 @@ function attachProductCardEvents(container) {
  */
 async function handleWishlistClick(btn) {
   if (!state || !state.user) {
-    if (typeof toast === 'function') toast('Silakan login dulu!');
+    if (typeof toast === 'function') toast('Silakan login dulu untuk menyimpan favorit!');
     window.location.href = 'login.html';
     return;
   }
 
-  const listingId = btn.dataset.listingId;
-  const isCurrentlyWishlisted = btn.classList.contains('active');
+  const listingId = Number(btn.dataset.listingId);
+  const isCurrentlyWishlisted = state.wishlistIds.has(listingId);
 
+  // 1. Optimistic Update: Langsung ubah UI & State tanpa nunggu server
+  if (isCurrentlyWishlisted) {
+    state.wishlistIds.delete(listingId);
+  } else {
+    state.wishlistIds.add(listingId);
+  }
+  
+  // Panggil fungsi sinkronisasi dari app.js
+  if (typeof syncPersistentUI === 'function') syncPersistentUI();
+
+  // 2. Tembak API ke Database
   try {
     const res = await fetch('/api/wishlist', {
       method: isCurrentlyWishlisted ? 'DELETE' : 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ listingId: parseInt(listingId) })
+      body: JSON.stringify({ listingId: listingId })
     });
 
-    const result = await res.json();
-
-    if (res.ok) {
-      btn.classList.toggle('active');
-      
-      if (isCurrentlyWishlisted) {
-        userWishlistIds.delete(parseInt(listingId));
-        if (typeof toast === 'function') toast('Dihapus dari wishlist');
-      } else {
-        userWishlistIds.add(parseInt(listingId));
-        if (typeof toast === 'function') toast('Ditambahkan ke wishlist ❤️');
-      }
-      
-      updateWishlistBadge();
-    } else {
-      if (typeof toast === 'function') toast(result.error || 'Gagal memperbarui wishlist');
+    if (!res.ok) throw new Error('Gagal memperbarui database');
+    
+    if (typeof toast === 'function') {
+      toast(isCurrentlyWishlisted ? 'Dihapus dari wishlist' : 'Ditambahkan ke wishlist ❤️');
     }
+
   } catch (error) {
     console.error('Wishlist error:', error);
-    if (typeof toast === 'function') toast('Terjadi kesalahan jaringan');
+    // 3. Revert/Kembalikan state jika API gagal
+    if (isCurrentlyWishlisted) state.wishlistIds.add(listingId);
+    else state.wishlistIds.delete(listingId);
+    
+    if (typeof syncPersistentUI === 'function') syncPersistentUI();
+    if (typeof toast === 'function') toast('Gagal menyimpan. Terjadi kesalahan jaringan.');
   }
 }
 

@@ -5,7 +5,15 @@ const conditionNames = {
   like_new: "Seperti baru",
 };
 
-const state = { user: null, activeConversation: null, conversations: [], pollTimer: null, chatRole: "buying" };
+const state = {
+  user: null,
+  activeConversation: null,
+  conversations: [],
+  pollTimer: null,
+  chatRole: "buying",
+  wishlistIds: new Set(), // Menyimpan daftar listing_id favorit
+  cartIds: new Set()      // Menyimpan daftar listing_id keranjang
+};
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
@@ -106,6 +114,49 @@ function cardMarkup(item, own = false) {
   </article>`;
 }
 
+// 1. Fungsi Utama untuk Memproses Klik Wishlist
+async function toggleWishlist(listingId) {
+  // Cek apakah user sudah login
+  if (!state || !state.user) {
+    toast('Silakan login dulu untuk menyimpan favorit!');
+    window.location.href = 'login.html';
+    return;
+  }
+
+  const id = Number(listingId);
+  const isCurrentlyWishlisted = state.wishlistIds.has(id);
+
+  // Optimistic Update: Langsung ubah State & UI tanpa nunggu balasan server!
+  if (isCurrentlyWishlisted) {
+    state.wishlistIds.delete(id);
+  } else {
+    state.wishlistIds.add(id);
+  }
+  syncPersistentUI(); // Panggil fungsi perubah warna
+
+  // Tembak API ke Database di latar belakang
+  try {
+    await api('/api/wishlist', {
+      method: isCurrentlyWishlisted ? 'DELETE' : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ listingId: id })
+    });
+
+    toast(isCurrentlyWishlisted ? 'Dihapus dari wishlist' : 'Ditambahkan ke wishlist ❤️');
+  } catch (error) {
+    console.error('Wishlist error:', error);
+    
+    // Rollback (kembalikan warna) jika request ke database ternyata gagal/error
+    if (isCurrentlyWishlisted) state.wishlistIds.add(id);
+    else state.wishlistIds.delete(id);
+    
+    syncPersistentUI();
+    toast('Gagal menyimpan ke wishlist. Cek koneksi.');
+  }
+}
+
+
+
 function renderListings(items, own = false) {
   const grid = $(own ? "#my-listing-grid" : "#listing-grid");
   const empty = $(own ? "#my-listing-empty" : "#market-empty");
@@ -118,6 +169,9 @@ function renderListings(items, own = false) {
     grid.querySelectorAll(".listing-card").forEach((card) => {
     card.addEventListener("click", (event) => {
       if (event.target.closest("[data-status-id], [data-reactivate-id], [data-edit-id], [data-delete-item-id]")) return;
+      if (event.target.closest(".btn-wishlist-card, [data-status-id], [data-reactivate-id], [data-edit-id], [data-delete-item-id]")) {
+      return; // Batalkan navigasi ke detail produk jika yang diklik tombol love / tombol aksi
+    }
       window.location.href = "detailProduct.php?id=" + encodeURIComponent(card.dataset.listingId);
     });
   });
@@ -145,6 +199,8 @@ function renderListings(items, own = false) {
   grid.querySelectorAll("[data-view-id]").forEach((button) => {
     button.addEventListener("click", (event) => { event.stopPropagation(); showListing(button.dataset.viewId); });
   });
+
+  syncPersistentUI();
 }
 
 async function loadListings(own = false) {
@@ -268,7 +324,16 @@ async function refreshUser() {
   const { user } = await api("/api/me");
   state.user = user;
   updateUserUI();
-  if (user) await refreshConversations();
+  if (user) {
+    await refreshConversations();
+    // Tarik data Wishlist & Cart dari database
+    await Promise.all([loadUserWishlistStatus(), loadUserCartStatus()]); 
+  } else {
+    // Kosongkan state jika tidak login
+    state.wishlistIds.clear();
+    state.cartIds.clear();
+    syncPersistentUI();
+  }
 }
 
 function switchView(name) {
@@ -1153,56 +1218,68 @@ if (convsParam) {
 // LOAD STATUS WISHLIST & CART (Biar persisten saat reload)
 // ============================================================
 
-let userWishlistIds = new Set();
 let userCartIds = new Set();
 
-async function loadUserWishlistStatus() {
-    try {
-        const res = await fetch('/api/wishlist');
-        const data = await res.json();
-        if (data.wishlists) {
-            userWishlistIds = new Set(data.wishlists.map(item => item.id));
-            
-            // Update semua tombol hati di halaman
-            document.querySelectorAll('.btn-wishlist-card').forEach(btn => {
-                const id = parseInt(btn.dataset.listingId);
-                if (userWishlistIds.has(id)) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
-            });
-            
-            // Update badge di navbar
-            updateWishlistBadge();
-        }
-    } catch (e) {
-        console.log('Gagal load wishlist status');
+function syncPersistentUI() {
+  // 1. Sync Wishlist
+  document.querySelectorAll('.btn-wishlist-card').forEach(btn => {
+    const listingId = Number(btn.dataset.listingId);
+    if (state.wishlistIds.has(listingId)) {
+      btn.classList.add('active'); // Jadikan merah
+    } else {
+      btn.classList.remove('active'); // Jadikan kosong
     }
+  });
+
+  const wishlistBadge = $('#wishlist-count');
+  if (wishlistBadge) {
+    wishlistBadge.textContent = state.wishlistIds.size;
+    wishlistBadge.classList.toggle('hidden', state.wishlistIds.size === 0);
+  }
+
+  // 2. Sync Cart (Jika ada tombol Add to Cart di card)
+  document.querySelectorAll('.btn-add-cart').forEach(btn => {
+    const listingId = Number(btn.dataset.listingId);
+    if (state.cartIds.has(listingId)) {
+      btn.classList.add('active');
+      btn.innerHTML = '✓ Dalam Keranjang';
+    } else {
+      btn.classList.remove('active');
+      btn.innerHTML = '🛒 Tambah ke Keranjang';
+    }
+  });
+}
+
+async function loadUserWishlistStatus() {
+  if (!state.user) {
+    state.wishlistIds.clear();
+    syncPersistentUI();
+    return;
+  }
+  try {
+    const { wishlists } = await api('/api/wishlist');
+    // Masukkan semua ID barang ke dalam Set
+    state.wishlistIds = new Set((wishlists || []).map(item => Number(item.id || item.listing_id)));
+    syncPersistentUI();
+  } catch (e) {
+    console.error('Gagal memuat status wishlist:', e);
+  }
 }
 
 async function loadUserCartStatus() {
-    try {
-        const res = await fetch('/api/cart');
-        const data = await res.json();
-        if (data.cart) {
-            userCartIds = new Set(data.cart.map(item => item.listing_id));
-            
-            // Update semua tombol cart di halaman
-            document.querySelectorAll('.btn-add-cart').forEach(btn => {
-                const id = parseInt(btn.dataset.listingId);
-                if (userCartIds.has(id)) {
-                    btn.classList.add('active');
-                    btn.innerHTML = '✓ Dalam Keranjang';
-                } else {
-                    btn.classList.remove('active');
-                    btn.innerHTML = '🛒 Tambah ke Keranjang';
-                }
-            });
-        }
-    } catch (e) {
-        console.log('Gagal load cart status');
-    }
+  if (!state.user) {
+    state.cartIds.clear();
+    refreshCartCount(); // Fungsi bawaanmu
+    return;
+  }
+  try {
+    const { cart } = await api('/api/cart');
+    state.cartIds = new Set((cart || []).map(item => Number(item.listing_id)));
+    refreshCartCount(); // Fungsi bawaanmu
+    syncPersistentUI();
+  } catch (e) {
+    console.error('Gagal memuat status keranjang:', e);
+  }
 }
 
 function updateWishlistBadge() {
@@ -1214,7 +1291,22 @@ function updateWishlistBadge() {
     }
 }
 
+// Tambahkan event listener global ini di bagian bawah app.js
+document.addEventListener("click", (event) => {
+  const btn = event.target.closest(".btn-wishlist-card");
+  if (btn) {
+    event.preventDefault();
+    event.stopPropagation(); // ✋ KUNCI UTAMA: Hentikan rambatan event ke kartu induk!
+
+    const listingId = btn.dataset.listingId;
+    if (listingId && typeof toggleWishlist === "function") {
+      toggleWishlist(listingId);
+    }
+  }
+});
+
 document.addEventListener('DOMContentLoaded', () => {
     loadUserWishlistStatus();
     updateWishlistBadge();
 });
+
