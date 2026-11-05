@@ -25,24 +25,6 @@ if ($userId) {
 $isLoggedIn = !empty($userId);
 ?>
 
-<!-- 1. TOP UTILITY BAR -->
-<div class="top-bar">
-  <div class="container top-bar-inner">
-    <div class="top-bar-left">
-      <span class="badge-campus">Portal Resmi Jual Beli Mahasiswa Gunadarma</span>
-      <span class="divider">|</span>
-      <span class="location-picker">📍 Wilayah COD: <strong>Kampus D, E, J, H</strong></span>
-    </div>
-    <div class="top-bar-right">
-      <span>🛡️ 100% Bebas Biaya Admin</span>
-      <span class="divider">|</span>
-      <a href="#buyer-protection" class="link-hover">Panduan COD Aman</a>
-      <span class="divider">|</span>
-      <span class="signed-in-only hidden top-npm" id="top-npm-badge">NPM: <strong id="top-user-npm">-</strong></span>
-    </div>
-  </div>
-</div>
-
 <!-- 2. MAIN HEADER -->
 <header class="navbar-main">
   <div class="container navbar-inner">

@@ -37,7 +37,7 @@ if (session_status() === PHP_SESSION_NONE) session_start();
   </div>
 </main>
 
-<?php include 'public/components/footer.html'; ?>
+<?php include 'components/footer.html'; ?>
 
 <script src="js/app.js"></script>
 <script>
