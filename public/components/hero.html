@@ -1,50 +1,69 @@
-<!-- 4. HERO SECTION -->
-<section class="hero-section" id="welcome-banner">
-  <div class="hero-grid">
-    
-    <aside class="hero-sidebar">
-      <div class="sidebar-header">Kategori Utama</div>
-      <ul class="sidebar-menu">
-        <li class="sidebar-item" data-category="1">📚 Buku & Modul Kuliah</li>
-        <li class="sidebar-item" data-category="2">💻 Elektronik & Praktikum <span class="badge-hot">Hot</span></li>
-        <li class="sidebar-item" data-category="3">🛏️ Perlengkapan Kos</li>
-        <li class="sidebar-item" data-category="4">🥼 Jas Lab & Fashion UG</li>
-        <li class="sidebar-item" data-category="5">🛵 Kendaraan & Helm</li>
-        <li class="sidebar-item" data-category="6">📦 Kebutuhan Lainnya</li>
-      </ul>
-    </aside>
-
-    <div class="hero-banner">
-      <div class="banner-content">
-        <span class="banner-tag">🎓 PRELOVED RESMI GUNADARMA</span>
-        <h1 class="banner-heading">Barang Bagus,<br>Harga Sahabat Mahasiswa.</h1>
-        <p class="banner-sub">COD mudah di area kampus tanpa resiko ongkir!</p>
-        <div class="banner-actions">
-          <button class="btn btn-primary" id="welcome-sell">Mulai Jual →</button>
-          <a href="#listing-grid" class="btn btn-secondary">Lihat Barang</a>
-        </div>
+<!-- HERO & CATEGORY SECTION (CANVA STYLE) -->
+<section id="welcome-banner">
+  
+  <!-- 1. Hero Layout (Kiri Banner, Kanan Akun) -->
+  <div class="hero-layout-modern">
+    <!-- Banner Kiri -->
+    <div class="hero-slider-modern">
+      <div style="position: relative; z-index: 2;">
+        <span style="background: var(--color-accent); color: var(--color-ink); padding: 4px 12px; border-radius: 99px; font-size: 11px; font-weight: 700; margin-bottom: 16px; display: inline-block;">✨ PRELOVED GUNADARMA</span>
+        <h1 style="font-size: 36px; font-weight: 800; line-height: 1.2; margin-bottom: 12px;">Barang Bagus,<br>Harga Mahasiswa.</h1>
+        <p style="font-size: 14px; opacity: 0.9; margin-bottom: 24px;">COD mudah di area kampus, tanpa potongan admin.</p>
+        <button class="btn" id="welcome-sell" style="background: #fff; color: var(--color-primary); border-radius: 99px; padding: 0 24px; font-weight: 700;">Mulai Jual Barang</button>
       </div>
     </div>
 
-    <aside class="hero-user-box">
-      <div class="user-box-card">
-        <div class="user-box-header">
-          <div class="avatar-lg" id="hero-user-avatar">🎓</div>
-          <div class="user-box-info">
-            <span class="text-sm text-gray">Halo, Mahasiswa UG!</span>
-            <strong class="text-lg" id="hero-user-name">Tamu Kampus</strong>
-          </div>
-        </div>
-        <div class="user-box-trust">
-          <span>✅ 100% Khusus Civitas UG</span>
-          <span>🤝 COD Bebas Admin</span>
-        </div>
-        <div class="user-box-actions">
-          <button class="btn btn-primary w-full mb-2" id="hero-action-sell">＋ Pasang Iklan</button>
-          <button class="btn btn-outline w-full" id="hero-action-login">Masuk / Profil</button>
+    <!-- User Box Kanan -->
+    <div class="hero-auth-modern">
+      <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px;">
+        <div id="hero-user-avatar" style="width: 56px; height: 56px; border-radius: 50%; background: var(--color-primary-subtle); color: var(--color-primary); display: grid; place-items: center; font-size: 24px; font-weight: 800;">🎓</div>
+        <div>
+          <div style="font-size: 13px; color: var(--color-text-muted);">Hi, Sobat Gundar!</div>
+          <strong id="hero-user-name" style="font-size: 16px; color: var(--color-text-main);">Tamu Kampus</strong>
         </div>
       </div>
-    </aside>
-
+      <p style="font-size: 13px; color: var(--color-text-muted); margin-bottom: 24px; line-height: 1.5;">Masuk atau Daftar pakai NPM buat akses fitur lengkap PasarKampus!</p>
+      
+      <div style="display: flex; gap: 12px;">
+        <button class="btn btn-primary" id="hero-action-login" style="flex: 1; border-radius: 8px;">Masuk / Profil</button>
+        <button class="btn btn-outline" id="hero-action-sell" style="flex: 1; border-radius: 8px;">Aktivasi</button>
+      </div>
+    </div>
   </div>
+
+  <!-- 2. Kategori Lingkaran Horizontal -->
+  <div class="category-circles-wrap">
+    <div class="category-circles">
+      <div class="cat-circle-item sidebar-item" data-category="1">
+        <div class="cat-circle-icon">📚</div>
+        <span class="cat-circle-label">Buku & Modul</span>
+      </div>
+      <div class="cat-circle-item sidebar-item" data-category="4">
+        <div class="cat-circle-icon">🥼</div>
+        <span class="cat-circle-label">Jas Lab</span>
+      </div>
+      <div class="cat-circle-item sidebar-item" data-category="3">
+        <div class="cat-circle-icon">🛏️</div>
+        <span class="cat-circle-label">Kebutuhan Kos</span>
+      </div>
+      <div class="cat-circle-item sidebar-item" data-category="2">
+        <div class="cat-circle-icon">💻</div>
+        <span class="cat-circle-label">Elektronik</span>
+      </div>
+      <div class="cat-circle-item sidebar-item" data-category="5">
+        <div class="cat-circle-icon">🛵</div>
+        <span class="cat-circle-label">Kendaraan</span>
+      </div>
+      <div class="cat-circle-item sidebar-item" data-category="6">
+        <div class="cat-circle-icon">📐</div>
+        <span class="cat-circle-label">Alat Tulis</span>
+      </div>
+      <!-- Tombol ini bisa diset untuk reset filter (semua kategori) -->
+      <div class="cat-circle-item" id="reset-cat-btn">
+        <div class="cat-circle-icon">⋯</div>
+        <span class="cat-circle-label">Lainnya</span>
+      </div>
+    </div>
+  </div>
+
 </section>

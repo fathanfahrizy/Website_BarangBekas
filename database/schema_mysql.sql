@@ -1,12 +1,14 @@
 -- ============================================================
 -- Skema Database MySQL / MariaDB (XAMPP / phpMyAdmin)
--- PasarKampus Gunadarma - Marketplace Barang Bekas Kampus
+-- PasarKampus Gunadarma - FINAL MERGE
 -- ============================================================
 
 CREATE DATABASE IF NOT EXISTS marketplace_gunadarma CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE marketplace_gunadarma;
 
--- 1. Tabel Fakultas
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- 1. TABEL FAKULTAS & PROGRAM STUDI (Beserta Data Awal)
 CREATE TABLE IF NOT EXISTS faculties (
     code VARCHAR(10) PRIMARY KEY,
     name VARCHAR(150) NOT NULL
@@ -21,7 +23,6 @@ INSERT INTO faculties (code, name) VALUES
     ('FIKES', 'Fakultas Ilmu Kesehatan & Farmasi / Agroteknologi')
 ON DUPLICATE KEY UPDATE name = VALUES(name);
 
--- 2. Tabel Program Studi (dengan prefix NPM 3 digit)
 CREATE TABLE IF NOT EXISTS study_programs (
     prefix VARCHAR(3) PRIMARY KEY,
     faculty_code VARCHAR(10) NOT NULL,
@@ -36,28 +37,10 @@ INSERT INTO study_programs (prefix, faculty_code, program_code, degree, name) VA
     ('504', 'FIKTI', '04', 'S1', 'Informatika / Teknik Informatika'),
     ('111', 'FIKTI', '11', 'D3', 'Manajemen Informatika'),
     ('102', 'FE', '02', 'S1', 'Manajemen'),
-    ('202', 'FE', '02', 'S1', 'Akuntansi'),
-    ('206', 'FE', '06', 'S1', 'Ekonomi Syariah'),
-    ('112', 'FE', '12', 'D3', 'Manajemen Pemasaran'),
-    ('212', 'FE', '12', 'D3', 'Akuntansi'),
-    ('514', 'FTI', '14', 'S1', 'Teknik Elektro'),
-    ('524', 'FTI', '24', 'S1', 'Teknik Mesin'),
-    ('304', 'FTI', '04', 'S1', 'Teknik Industri'),
-    ('501', 'FTI', '01', 'D3', 'Teknik Komputer'),
-    ('204', 'FTSP', '04', 'S1', 'Teknik Sipil'),
-    ('214', 'FTSP', '14', 'S1', 'Arsitektur'),
-    ('105', 'FPS', '05', 'S1', 'Psikologi'),
-    ('108', 'FPS', '08', 'S1', 'Ilmu Komunikasi / Sastra Inggris'),
-    ('702', 'FIKES', '02', 'S1', 'Farmasi'),
-    ('404', 'FIKES', '04', 'S1', 'Agroteknologi'),
-    ('712', 'FIKES', '12', 'S1', 'Kedokteran')
-ON DUPLICATE KEY UPDATE 
-    faculty_code = VALUES(faculty_code),
-    program_code = VALUES(program_code),
-    degree = VALUES(degree),
-    name = VALUES(name);
+    ('202', 'FE', '02', 'S1', 'Akuntansi')
+ON DUPLICATE KEY UPDATE name = VALUES(name);
 
--- 3. Tabel Users (Mahasiswa Gunadarma)
+-- 2. TABEL PENGGUNA (Users)
 CREATE TABLE IF NOT EXISTS users (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     npm VARCHAR(8) NOT NULL UNIQUE,
@@ -69,7 +52,7 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 4. Tabel Kategori Barang Preloved
+-- 3. TABEL KATEGORI (Beserta Data Awal)
 CREATE TABLE IF NOT EXISTS categories (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL UNIQUE,
@@ -85,7 +68,7 @@ INSERT INTO categories (id, name, slug) VALUES
     (6, 'Lainnya', 'lainnya')
 ON DUPLICATE KEY UPDATE name = VALUES(name);
 
--- 5. Tabel Iklan Barang (Listings)
+-- 4. TABEL IKLAN BARANG (Listings & Images)
 CREATE TABLE IF NOT EXISTS listings (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     seller_id BIGINT NOT NULL,
@@ -93,16 +76,15 @@ CREATE TABLE IF NOT EXISTS listings (
     title VARCHAR(150) NOT NULL,
     description TEXT NOT NULL,
     price DECIMAL(12, 0) NOT NULL DEFAULT 0,
-    item_condition VARCHAR(20) NOT NULL,
+    item_condition VARCHAR(50) NOT NULL,
     meetup_location VARCHAR(150) DEFAULT NULL,
-    status VARCHAR(10) NOT NULL DEFAULT 'active',
+    status VARCHAR(20) NOT NULL DEFAULT 'active',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     sold_at TIMESTAMP NULL DEFAULT NULL,
     FOREIGN KEY (seller_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 6. Tabel Gambar Listing
 CREATE TABLE IF NOT EXISTS listing_images (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     listing_id BIGINT NOT NULL,
@@ -111,7 +93,30 @@ CREATE TABLE IF NOT EXISTS listing_images (
     FOREIGN KEY (listing_id) REFERENCES listings(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 7. Tabel Percakapan (Conversations)
+-- 5. TABEL INTERAKSI (Wishlists & Carts)
+-- Diambil dari versi fitur UI yang baru agar persistensi tombol berjalan lancar
+CREATE TABLE IF NOT EXISTS wishlists (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    listing_id BIGINT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_wishlist_item (user_id, listing_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (listing_id) REFERENCES listings(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS carts (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    listing_id BIGINT NOT NULL,
+    quantity INT NOT NULL DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_cart_item (user_id, listing_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (listing_id) REFERENCES listings(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 6. TABEL KOMUNIKASI (Conversations & Messages)
 CREATE TABLE IF NOT EXISTS conversations (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     listing_id BIGINT NOT NULL,
@@ -126,18 +131,19 @@ CREATE TABLE IF NOT EXISTS conversations (
     FOREIGN KEY (seller_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 8. Tabel Pesan Chat (Messages)
 CREATE TABLE IF NOT EXISTS messages (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     conversation_id BIGINT NOT NULL,
     sender_id BIGINT NOT NULL,
-    body TEXT NOT NULL,
+    body TEXT,
+    attachment_type ENUM('image', 'video', 'document') NULL,
+    attachment_url VARCHAR(255) NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE CASCADE,
     FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 9. Tabel Alamat Pengiriman (Untuk fitur Beli Online & Diantar)
+-- 7. TABEL TRANSAKSI (Shipping, Orders, Items, Payments)
 CREATE TABLE IF NOT EXISTS shipping_addresses (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_id BIGINT NOT NULL,
@@ -153,19 +159,6 @@ CREATE TABLE IF NOT EXISTS shipping_addresses (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 10. Tabel Keranjang Belanja (Cart)
-CREATE TABLE IF NOT EXISTS carts (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    user_id BIGINT NOT NULL,
-    listing_id BIGINT NOT NULL,
-    quantity INT NOT NULL DEFAULT 1,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (listing_id) REFERENCES listings(id) ON DELETE CASCADE,
-    UNIQUE KEY unique_cart_item (user_id, listing_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- 11. Tabel Pesanan Utama (Orders)
 CREATE TABLE IF NOT EXISTS orders (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     order_number VARCHAR(50) NOT NULL UNIQUE,
@@ -185,7 +178,6 @@ CREATE TABLE IF NOT EXISTS orders (
     FOREIGN KEY (shipping_address_id) REFERENCES shipping_addresses(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 12. Tabel Item Pesanan (Order Items - Snapshot harga & status per barang)
 CREATE TABLE IF NOT EXISTS order_items (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     order_id BIGINT NOT NULL,
@@ -199,7 +191,6 @@ CREATE TABLE IF NOT EXISTS order_items (
     FOREIGN KEY (seller_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 13. Tabel Pembayaran (Integrasi Payment Gateway seperti Midtrans)
 CREATE TABLE IF NOT EXISTS payments (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     order_id BIGINT NOT NULL,
@@ -213,7 +204,7 @@ CREATE TABLE IF NOT EXISTS payments (
     FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 14. Tabel Review & Rating (Opsional tapi bagus untuk Trust)
+-- 8. TABEL ULASAN (Reviews)
 CREATE TABLE IF NOT EXISTS reviews (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     order_item_id BIGINT NOT NULL,
@@ -227,3 +218,5 @@ CREATE TABLE IF NOT EXISTS reviews (
     FOREIGN KEY (seller_id) REFERENCES users(id) ON DELETE CASCADE,
     UNIQUE KEY unique_review (order_item_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+SET FOREIGN_KEY_CHECKS = 1;

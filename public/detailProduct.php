@@ -1,6 +1,6 @@
 <?php
 // ============================================================
-// Detail Product Page - PasarKampus Gunadarma
+// Detail Product Page - Re - Campus Gunadarma
 // ============================================================
 if (session_status() === PHP_SESSION_NONE) session_start();
 ?>
@@ -9,7 +9,7 @@ if (session_status() === PHP_SESSION_NONE) session_start();
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Detail Barang - PasarKampus Gunadarma</title>
+<title>Detail Barang - Re - Campus Gunadarma</title>
 <link rel="stylesheet" href="css/styles.css">
 <style>
 .pd-wrap { display:grid; grid-template-columns: 1fr 1fr; gap:40px; background:var(--color-bg-card); border:1px solid var(--color-border); border-radius:var(--radius-lg); padding:32px; margin-top:24px; }
@@ -53,7 +53,7 @@ async function loadProductPage() {
   try {
     const { listing } = await api(`/api/listings/${encodeURIComponent(listingId)}`);
     $('#pd-breadcrumb-cat').textContent = listing.category || 'Detail Barang';
-    document.title = listing.title + ' - PasarKampus Gunadarma';
+    document.title = listing.title + ' - Re - Campus Gunadarma';
 
     const isOwn = state.user && String(state.user.id) === String(listing.seller_id);
     const sold = listing.status === 'sold';

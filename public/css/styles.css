@@ -875,3 +875,153 @@ body { background-image: none; }
   background: #fff;
   box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
 }
+
+/* ============================================================
+   UI UPDATE: HOMEPAGE (CANVA STYLE)
+   ============================================================ */
+
+/* 1. Navbar Ungu Solid & Search Pill */
+.navbar-main.theme-solid {
+  background: var(--color-primary);
+  border-bottom: none;
+  padding: 12px 0;
+}
+.navbar-main.theme-solid .brand-name, 
+.navbar-main.theme-solid .action-icon {
+  color: #ffffff;
+}
+.navbar-main.theme-solid .brand-name strong {
+  color: var(--color-accent);
+}
+.navbar-main.theme-solid .brand-icon {
+  background: #ffffff;
+  color: var(--color-primary);
+  border: none;
+  border-radius: 12px;
+}
+.search-box.pill-style {
+  border-radius: 99px;
+  border: none;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 4px 6px;
+}
+.search-box.pill-style .search-input {
+  font-size: 13px;
+}
+.search-box.pill-style .search-btn {
+  background: var(--color-primary-light);
+  border-radius: 99px;
+  height: 36px;
+  width: 48px;
+  padding: 0;
+}
+
+/* 2. Hero Section (Banner Kiri, User Kanan) */
+.hero-layout-modern {
+  display: grid;
+  grid-template-columns: 2fr 1fr; /* Porsi 2:1 sesuai desain Canva */
+  gap: 24px;
+  margin-top: 24px;
+  margin-bottom: 32px;
+}
+.hero-slider-modern {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+  border-radius: 16px;
+  height: 280px;
+  display: flex;
+  align-items: center;
+  padding: 40px;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(92, 45, 145, 0.15);
+}
+.hero-slider-modern::after {
+  content: "UG";
+  position: absolute;
+  right: -20px;
+  bottom: -40px;
+  font-family: var(--font-display);
+  font-size: 200px;
+  color: rgba(255, 255, 255, 0.05);
+  pointer-events: none;
+}
+.hero-auth-modern {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+  border: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+}
+
+/* 3. Kategori Lingkaran (Horizontal Scroll) */
+.category-circles-wrap {
+  margin-bottom: 40px;
+}
+.category-circles {
+  display: flex;
+  gap: 32px;
+  overflow-x: auto;
+  padding: 12px 4px;
+  scrollbar-width: none; /* Hide scrollbar Firefox */
+}
+.category-circles::-webkit-scrollbar {
+  display: none; /* Hide scrollbar Chrome/Safari */
+}
+.cat-circle-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  min-width: 72px;
+  transition: transform 0.2s ease;
+}
+.cat-circle-item:hover {
+  transform: translateY(-4px);
+}
+.cat-circle-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1px solid var(--color-border);
+  display: grid;
+  place-items: center;
+  font-size: 32px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+  transition: all 0.2s ease;
+}
+.cat-circle-item:hover .cat-circle-icon {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  box-shadow: 0 6px 16px rgba(92, 45, 145, 0.15);
+}
+.cat-circle-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-main);
+  text-align: center;
+}
+
+/* 4. Judul Section Bergaris Bawah (Sesuai Canva) */
+.section-title-canva {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-text-main);
+  border-bottom: 2px solid var(--color-primary);
+  display: inline-block;
+  padding-bottom: 8px;
+  margin-bottom: 20px;
+}
+
+/* Penyesuaian Responsif */
+@media (max-width: 768px) {
+  .hero-layout-modern { grid-template-columns: 1fr; }
+  .hero-slider-modern { height: 200px; padding: 24px; }
+  .category-circles { gap: 20px; }
+  .cat-circle-icon { width: 60px; height: 60px; font-size: 28px; }
+}

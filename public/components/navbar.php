@@ -1,6 +1,6 @@
 <?php
 // ============================================================
-// NAVBAR COMPONENT - PasarKampus Gunadarma
+// NAVBAR COMPONENT - Re - Campus Gunadarma
 // ============================================================
 if (session_status() === PHP_SESSION_NONE) session_start();
 
@@ -46,10 +46,10 @@ $isLoggedIn = !empty($userId);
 <!-- 2. MAIN HEADER -->
 <header class="navbar-main">
   <div class="container navbar-inner">
-    <a class="brand" href="/" aria-label="PasarKampus Gunadarma">
+    <a class="brand" href="/" aria-label="Re - Campus Gunadarma">
       <div class="brand-icon">UG</div>
       <div class="brand-text">
-        <span class="brand-name">pasar<strong>kampus</strong></span>
+        <span class="brand-name">Re <strong>- Campus</strong></span>
       </div>
     </a>
 

@@ -1,6 +1,6 @@
 <?php
 // ============================================================
-// Cart Page - PasarKampus Gunadarma
+// Cart Page - Re - Campus Gunadarma
 // ============================================================
 if (session_status() === PHP_SESSION_NONE) session_start();
 if (empty($_SESSION['userId'])) {
@@ -13,7 +13,7 @@ if (empty($_SESSION['userId'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Obrolan - PasarKampus Gunadarma</title>
+    <title>Obrolan - Re - Campus Gunadarma</title>
     
     <!-- CSS Utama -->
     <link rel="stylesheet" href="css/styles.css">

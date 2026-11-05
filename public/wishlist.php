@@ -7,7 +7,7 @@ if (empty($_SESSION['userId'])) { header('Location: login.html'); exit; }
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wishlist Saya - PasarKampus</title>
+    <title>Wishlist Saya - Re - Campus</title>
     
     <!-- PAKAI SLASH (/) DI DEPAN: Browser akan selalu ambil dari http://localhost:8000/css/styles.css -->
     <link rel="stylesheet" href="/css/styles.css">
